@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نشر الفيديو - YYYY</title>
+    <!-- Supabase Library -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body {
+            font-family: sans-serif;
+            background-color: #F4EAE1;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .container {
+            width: 100%;
+            max-width: 450px;
+            background: #fff;
+            padding: 25px;
+            border-radius: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            box-sizing: border-box;
+        }
+        h3 {
+            margin-top: 0;
+            color: rgb(255, 136, 0);
+            text-align: center;
+        }
+        .preview-box {
+            width: 100%;
+            height: 200px;
+            background: #000;
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px dashed rgb(255, 136, 0);
+        }
+        .preview-box video {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        input[type="text"], textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            box-sizing: border-box;
+            font-size: 14px;
+            background: #fafafa;
+            outline: none;
+        }
+        input[type="text"]:focus, textarea:focus {
+            border-color: rgb(255, 136, 0);
+        }
+        textarea {
+            resize: vertical;
+            height: 80px;
+        }
+        #publishBtn {
+            background-color: rgb(255, 136, 0);
+            color: #fff;
+            border: none;
+            padding: 12px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            display: none;
+            width: 100%;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+        #publishBtn:hover {
+            background-color: #e67e00;
+        }
+        #msg {
+            color: #e74c3c;
+            text-align: center;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h3>نشر المنشور</h3>
+
+    <div class="preview-box">
+        <p id="msg">جاري سحب الفيديو...</p>
+        <video id="pulledVideo" controls style="display: none;"></video>
+    </div>
+
+    <div class="form-group">
+        <input type="text" id="videoTitle" placeholder="عنوان الفيديو..." oninput="validateForm()">
+    </div>
+
+    <div class="form-group">
+        <textarea id="videoDesc" placeholder="وصف الفيديو (اختياري)..."></textarea>
+    </div>
+
+    <button id="publishBtn" onclick="publishVideo()">نشر</button>
+</div>
+
+<script>
+    // إعدادات اتصال Supabase
+    const SUPABASE_URL = "https://lzvtnfdgynwczrkwlwhf.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx6dnRuZmRneW53Y3pya3dsd2hmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkxNDIxMTEsImV4cCI6MjEwNDcxODExMX0.w2hNlJ4SszyMBkUVjr1qiWNTTPxHMHkM9YOFtVP-pVI";
+
+    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    let videoDataUrl = "";
+    let currentUsername = "default_user";
+
+    window.addEventListener("DOMContentLoaded", () => {
+        videoDataUrl = sessionStorage.getItem("capturedVideo");
+
+        // استرجاع اسم المستخدم المسجل
+        let savedUsername = localStorage.getItem('user_username');
+        if (savedUsername) {
+            currentUsername = savedUsername;
+        }
+
+        const videoElement = document.getElementById("pulledVideo");
+        const msg = document.getElementById("msg");
+
+        if (videoDataUrl) {
+            videoElement.src = videoDataUrl;
+            msg.style.display = "none";
+            videoElement.style.display = "block";
+            validateForm();
+        } else {
+            msg.innerText = "لم يتم العثور على فيديو مسحب!";
+        }
+    });
+
+    function validateForm() {
+        const title = document.getElementById('videoTitle').value.trim();
+        const btn = document.getElementById('publishBtn');
+
+        if (title.length > 0 && videoDataUrl !== "") {
+            btn.style.display = 'block';
+        } else {
+            btn.style.display = 'none';
+        }
+    }
+
+    async function publishVideo() {
+        const title = document.getElementById('videoTitle').value.trim();
+        const desc = document.getElementById('videoDesc').value.trim();
+        const btn = document.getElementById('publishBtn');
+
+        if (!title || !videoDataUrl) return;
+
+        btn.innerText = "جاري النشر سحابياً...";
+        btn.disabled = true;
+
+        try {
+            // إدخال بيانات الفيديو في جدول videos سحابياً
+            const { error: dbError } = await supabaseClient
+                .from('videos')
+                .insert([
+                    {
+                        title: title,
+                        description: desc,
+                        video_url: videoDataUrl,
+                        author: currentUsername
+                    }
+                ]);
+
+            if (dbError) {
+                console.error("خطأ في رفع الفيديو للقاعدة:", dbError.message);
+                alert("حدث خطأ أثناء النشر السحابي: " + dbError.message);
+                btn.innerText = "نشر";
+                btn.disabled = false;
+                return;
+            }
+
+            // حفظ نسخة احتياطية محلية سريعة
+            let globalPosts = JSON.parse(localStorage.getItem('all_published_videos') || '[]');
+            globalPosts.unshift({
+                id: Date.now(),
+                title: title,
+                desc: desc,
+                url: videoDataUrl,
+                author: currentUsername,
+                date: new Date().toISOString()
+            });
+            localStorage.setItem('all_published_videos', JSON.stringify(globalPosts));
+
+            // الانتقال التلقائي إلى صفحة العرض
+            window.location.href = "v2.html";
+
+        } catch (err) {
+            console.error("خطأ غير متوقع:", err);
+            alert("حدث خطأ غير متوقع.");
+            btn.innerText = "نشر";
+            btn.disabled = false;
+        }
+    }
+</script>
+
+</body>
+</html>

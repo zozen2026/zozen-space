@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>إنشاء منشور جديد</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      width: 100vw;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding-top: 60px;
+      background: radial-gradient(circle at bottom right, #8a2be2 0%, #4a0e4e 50%, #1a0022 100%);
+      background-attachment: fixed;
+      font-family: sans-serif;
+      box-sizing: border-box;
+    }
+
+    .header-bar {
+      display: flex;
+      align-items: center;
+      background-color: #ffffff;
+      border: 2px solid rgba(255, 255, 255, 0.8);
+      border-radius: 30px;
+      padding: 6px 12px;
+      width: 90%;
+      max-width: 500px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+      transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .header-bar:focus-within {
+      box-shadow: 0 15px 35px rgba(138, 43, 226, 0.6);
+      transform: translateY(-2px);
+    }
+
+    #address-input {
+      flex: 1;
+      border: none;
+      outline: none;
+      background: transparent;
+      font-size: 16px;
+      padding: 10px 14px;
+      color: #222222;
+      font-family: inherit;
+    }
+
+    #publish-btn {
+      border: none;
+      outline: none;
+      padding: 8px 24px;
+      border-radius: 20px;
+      font-weight: bold;
+      font-size: 14px;
+      cursor: default;
+      background-color: transparent;
+      color: transparent;
+      pointer-events: none;
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    #publish-btn.active {
+      background-color: #ff6f00;
+      color: #ffffff;
+      cursor: pointer;
+      pointer-events: auto;
+      box-shadow: 0 4px 15px rgba(255, 111, 0, 0.5);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header-bar">
+    <input type="text" id="address-input" placeholder="عنوان" autocomplete="off">
+    <button id="publish-btn" disabled>نشر</button>
+  </div>
+
+  <script>
+    const addressInput = document.getElementById('address-input');
+    const publishBtn = document.getElementById('publish-btn');
+
+    addressInput.addEventListener('input', () => {
+      if (addressInput.value.trim().length > 0) {
+        publishBtn.classList.add('active');
+        publishBtn.disabled = false;
+      } else {
+        publishBtn.classList.remove('active');
+        publishBtn.disabled = true;
+      }
+    });
+
+    publishBtn.addEventListener('click', () => {
+      const postText = addressInput.value.trim();
+      if (!postText) return;
+
+      const userData = JSON.parse(localStorage.getItem('userAccount')) || { user: 'anonymous', accountName: 'مستخدم مجهول' };
+      const savedPic = localStorage.getItem('profilePic') || 'https://cdn-icons-png.flaticon.com/512/149/149071.png';
+
+      let posts = JSON.parse(localStorage.getItem('myPosts')) || [];
+
+      const newPost = {
+        id: Date.now(),
+        text: postText,
+        username: '@' + userData.user,
+        accountName: userData.accountName,
+        profilePic: savedPic
+      };
+      
+      posts.unshift(newPost);
+      localStorage.setItem('myPosts', JSON.stringify(posts));
+
+      // التوجيه الفوري إلى صفحة المنشورات vvvvv.html عند النشر
+      window.location.href = 'vvvvv.html';
+    });
+  </script>
+
+</body>
+</html>

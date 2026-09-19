@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>مشغل الفيديو المتفاعل - التصميم البرتقالي</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body { margin: 0; padding: 0; background-color: #F4EAE1; font-family: 'Segoe UI', sans-serif; overflow-x: hidden; }
+        
+        /* القائمة الجانبية الأصلية */
+        .sidebar { position: fixed; right: 0; top: 0; height: 100%; width: 80px; background: white; display: flex; flex-direction: column; align-items: center; padding-top: 30px; z-index: 2000; box-shadow: -2px 0 10px rgba(0,0,0,0.1); }
+        .sidebar a { margin-bottom: 35px; color: rgb(255, 136, 0); font-size: 26px; text-decoration: none; transition: 0.3s; }
+        .sidebar a:hover { transform: scale(1.2); color: #ffe0b2; }
+        
+        /* الهيدر العلوي */
+        .header-top { position: fixed; top: 0; left: 0; right: 80px; height: 80px; background: white; display: flex; align-items: center; justify-content: space-between; padding: 0 30px; z-index: 1000; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+
+        /* حاوية المحتوى الرئيسي للمشغل والاقتراحات */
+        .player-container { display: flex; gap: 25px; padding: 110px 40px 40px 110px; margin-right: 80px; direction: rtl; }
+
+        /* قسم الفيديوهات المقترحة على الجانب الأيمن */
+        .suggestions-sidebar { width: 350px; flex-shrink: 0; display: flex; flex-direction: column; gap: 15px; }
+        .suggestion-title { font-size: 18px; font-weight: bold; color: #333; margin-bottom: 5px; border-bottom: 2px solid orange; padding-bottom: 5px; }
+        
+        /* كارت الفيديو المقترح */
+        .suggested-card { background: white; border-radius: 10px; overflow: hidden; display: flex; gap: 10px; padding: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); cursor: pointer; transition: 0.3s; border-right: 3px solid transparent; }
+        .suggested-card:hover { transform: scale(1.02); border-right: 3px solid orange; }
+        .suggested-thumb { width: 120px; aspect-ratio: 16/9; background: #000; object-fit: cover; border-radius: 5px; }
+        .suggested-info { display: flex; flex-direction: column; justify-content: center; flex-grow: 1; overflow: hidden; }
+        .suggested-video-title { font-weight: bold; font-size: 14px; color: #333; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .suggested-meta { font-size: 12px; color: orange; margin-top: 5px; }
+
+        /* قسم المشغل الرئيسي والتعليقات على اليسار */
+        .main-player-area { flex-grow: 1; display: flex; flex-direction: column; gap: 20px; }
+        .video-box { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); }
+        .main-video { width: 100%; aspect-ratio: 16/9; background: #000; border-radius: 10px; object-fit: contain; }
+        
+        /* تفاصيل الفيديو والتفاعل */
+        .video-details { margin-top: 20px; display: flex; flex-direction: column; gap: 15px; }
+        .details-header { display: flex; justify-content: space-between; align-items: center; }
+        .video-title { font-size: 22px; font-weight: bold; color: #333; }
+        
+        /* زر الإعجاب (القلب) */
+        .like-btn { cursor: pointer; font-size: 22px; color: #ccc; transition: 0.2s; display: flex; align-items: center; gap: 8px; font-weight: bold; user-select: none; }
+        .like-btn.liked { color: orange; }
+        .like-btn:hover { transform: scale(1.1); }
+
+        /* منطقة بيانات الحساب */
+        .account-info { display: flex; align-items: center; gap: 15px; padding-top: 15px; border-top: 1px solid #eee; }
+        .account-link { display: flex; align-items: center; gap: 15px; text-decoration: none; cursor: pointer; }
+        .account-img { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 2px solid orange; background: #ccc; }
+        .account-text { display: flex; flex-direction: column; }
+        .user-name { font-weight: bold; color: orange; font-size: 16px; }
+        .account-name { color: #777; font-size: 13px; margin-top: 2px; }
+
+        /* قسم التعليقات الجديد */
+        .comments-section { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); }
+        .comments-title { font-size: 18px; font-weight: bold; margin-bottom: 15px; color: #333; }
+        
+        /* صندوق إدخال تعليق */
+        .comment-input-box { display: flex; gap: 15px; margin-bottom: 25px; align-items: center; }
+        .comment-input { flex-grow: 1; padding: 12px 20px; border: 2px solid #eee; border-radius: 25px; font-family: inherit; font-size: 14px; outline: none; transition: 0.3s; }
+        .comment-input:focus { border-color: orange; }
+        .comment-submit-btn { background: orange; color: white; border: none; padding: 12px 25px; border-radius: 25px; cursor: pointer; font-weight: bold; transition: 0.3s; }
+        .comment-submit-btn:hover { background: rgb(255, 115, 0); }
+
+        /* قائمة التعليقات (تعليق فوق تعليق) */
+        .comments-list { display: flex; flex-direction: column; gap: 15px; max-height: 400px; overflow-y: auto; padding-left: 5px; }
+        .comment-card { background: #fafafa; border-right: 4px solid orange; padding: 15px; border-radius: 8px; display: flex; gap: 12px; align-items: flex-start; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
+        .comment-user-img { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; cursor: pointer; border: 1px solid orange; }
+        .comment-content { display: flex; flex-direction: column; gap: 5px; flex-grow: 1; }
+        .comment-user-meta { font-size: 13px; font-weight: bold; color: orange; cursor: pointer; }
+        .comment-user-meta span { color: #999; font-size: 11px; font-weight: normal; margin-right: 5px; }
+        .comment-text-body { font-size: 14px; color: #444; line-height: 1.4; }
+
+        /* تصميم نافذة التنبيه (Modal) لتسجيل الدخول */
+        .auth-modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); display: none; justify-content: center; align-items: center; z-index: 3000; }
+        .auth-modal { background: white; width: 350px; padding: 25px; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.2); position: relative; text-align: center; display: flex; flex-direction: column; gap: 20px; }
+        .auth-modal-close { position: absolute; top: 15px; left: 15px; font-size: 20px; color: #777; cursor: pointer; transition: 0.2s; }
+        .auth-modal-close:hover { color: #000; }
+        .auth-modal-text { font-size: 16px; color: #333; font-weight: bold; line-height: 1.5; margin-top: 10px; }
+        .auth-modal-btn { background: orange; color: white; border: none; padding: 12px; border-radius: 25px; cursor: pointer; font-weight: bold; font-size: 15px; transition: 0.3s; text-decoration: none; display: inline-block; }
+        .auth-modal-btn:hover { background: rgb(255, 115, 0); }
+    </style>
+</head>
+<body onload="initPlayer()">
+
+    <div class="sidebar">
+        <a href="index.html"><i class="fas fa-house"></i></a>
+        <a href="profile.html"><i class="fas fa-circle-user"></i></a>
+        <a href="bell.html"><i class="fas fa-bell"></i></a>
+        <a href="create.html"><i class="fas fa-external-link-alt"></i></a>
+    </div>
+
+    <div class="header-top">
+        <img src="file:///C:/Users/USER/Desktop/مجلد جديد/.png-image_16162666.png" style="width: 40px; height: 40px; object-fit: contain;" alt="Logo">
+    </div>
+
+    <div class="player-container">
+        
+        <div class="suggestions-sidebar">
+            <div class="suggestion-title">فيديوهات مقترحة</div>
+            <div id="suggestionsGrid"></div>
+        </div>
+
+        <div class="main-player-area">
+            
+            <div class="video-box">
+                <video id="mainVideoPlayer" class="main-video" controls autoplay src=""></video>
+                
+                <div class="video-details">
+                    <div class="details-header">
+                        <div id="mainVideoTitle" class="video-title">تحميل العنوان...</div>
+                        <div id="likeButton" class="like-btn" onclick="toggleLike()">
+                            <i class="fas fa-heart"></i>
+                            <span id="likeCount">0</span>
+                        </div>
+                    </div>
+                    
+                    <div class="account-info">
+                        <div id="accountLinkContainer" class="account-link">
+                            <img id="mainAccountImg" class="account-img" src="" alt="صورة الحساب">
+                            <div class="account-text">
+                                <span id="mainUserName" class="user-name">اسم المستخدم</span>
+                                <span id="mainAccountName" class="account-name">اسم الحساب</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="comments-section">
+                <div class="comments-title">التعليقات (<span id="commentsCount">0</span>)</div>
+                
+                <div class="comment-input-box">
+                    <input type="text" id="newCommentInput" class="comment-input" placeholder="اكتب تعليقاً علنياً..." onclick="checkAuthForComment(event)">
+                    <button class="comment-submit-btn" onclick="addNewComment()">تعليق</button>
+                </div>
+
+                <div id="commentsList" class="comments-list"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- نافذة منبثقة لتنبيه تسجيل الدخول -->
+    <div id="authModal" class="auth-modal-overlay">
+        <div class="auth-modal">
+            <span class="auth-modal-close" onclick="closeAuthModal()">&times;</span>
+            <div id="authModalMessage" class="auth-modal-text">يجب ان تنشئ حساب لكي تتمكن تكتب تعليقات.</div>
+            <a href="profile.html" class="auth-modal-btn">حسناً لننشئ حساباً او اسجل دخول</a>
+        </div>
+    </div>
+
+    <script>
+    let currentVideo = null;
+
+    // دالة التحقق مما إذا كان المستخدم مسجل الدخول
+    function isUserLoggedIn() {
+        const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+        // يمكنك تعديل الشرط بناءً على هيكل بيانات المستخدم لديك (مثلاً التأكد من وجود اسم مستخدم أو رمز)
+        return currentUser && currentUser.userName && currentUser.userName !== "مستخدم حالي";
+    }
+
+    // إظهار النافذة المنبثقة بالرسالة المطلوبة
+    function showAuthModal(message) {
+        document.getElementById('authModalMessage').innerText = message;
+        document.getElementById('authModal').style.display = 'flex';
+    }
+
+    // إغلاق النافذة المنبثقة
+    function closeAuthModal() {
+        document.getElementById('authModal').style.display = 'none';
+    }
+
+    // منع الكتابة/التركيز على شريط التعليقات إذا لم يكن مسجلاً
+    function checkAuthForComment(event) {
+        if (!isUserLoggedIn()) {
+            event.preventDefault();
+            document.getElementById('newCommentInput').blur(); // إبعاد التركيز عن حقل الإدخال
+            showAuthModal('يجب ان تنشئ حساب لكي تتمكن تكتب تعليقات.');
+        }
+    }
+
+    // دالة تشغيل الصفحة وجلب البيانات
+    function initPlayer() {
+        currentVideo = JSON.parse(localStorage.getItem('selectedVideo'));
+        
+        if (currentVideo) {
+            renderMainVideo(currentVideo);
+        } else {
+            document.getElementById('mainVideoTitle').innerText = "لم يتم اختيار فيديو لتشغيله.";
+        }
+
+        renderSuggestions();
+    }
+
+    // دالة لتوجيه المستخدم لصفحة الحساب مع البيانات بالرابط
+    function goToProfile(accountName, userName) {
+        window.location.href = `jndfsl.html?account=${encodeURIComponent(accountName)}&username=${encodeURIComponent(userName)}`;
+    }
+
+    // دالة لعرض وتحديث الفيديو الرئيسي في المشغل والبيانات والتفاعل
+    function renderMainVideo(video) {
+        const player = document.getElementById('mainVideoPlayer');
+        player.src = video.url;
+        player.play();
+
+        document.getElementById('mainVideoTitle').innerText = video.title || 'بدون عنوان';
+        document.getElementById('mainUserName').innerText = video.userName || 'مستخدم';
+        document.getElementById('mainAccountName').innerText = video.accountName || '';
+        
+        const accountImgUrl = video.accountImg || 'https://via.placeholder.com/50/orange/white?text=User';
+        document.getElementById('mainAccountImg').src = accountImgUrl;
+
+        document.getElementById('accountLinkContainer').onclick = function() {
+            goToProfile(video.accountName || '', video.userName || 'مستخدم');
+        };
+
+        const likeBtn = document.getElementById('likeButton');
+        const currentUserData = JSON.parse(localStorage.getItem('currentUser')) || {};
+        const currentViewer = currentUserData.userName || video.userName || 'مستخدم'; 
+        
+        const videoLikesKey = `likes_${btoa(video.url)}`;
+        let likedUsers = JSON.parse(localStorage.getItem(videoLikesKey)) || [];
+
+        if (likedUsers.includes(currentViewer)) {
+            likeBtn.classList.add('liked');
+        } else {
+            likeBtn.classList.remove('liked');
+        }
+
+        document.getElementById('likeCount').innerText = video.likes || 0;
+        loadComments(video.url);
+    }
+
+    // دالة لتغيير حالة الإعجاب (القلب) مع التحقق من الحساب
+    function toggleLike() {
+        if (!isUserLoggedIn()) {
+            showAuthModal('يجب ان تنشئ حساب لكي تتمكن من الإعجاب.');
+            return;
+        }
+
+        if (!currentVideo) return;
+
+        const likeBtn = document.getElementById('likeButton');
+        const likeCountSpan = document.getElementById('likeCount');
+        let currentLikes = parseInt(likeCountSpan.innerText);
+        
+        const currentUserData = JSON.parse(localStorage.getItem('currentUser')) || {};
+        const currentViewer = currentUserData.userName || 'مستخدم';
+        
+        const videoLikesKey = `likes_${btoa(currentVideo.url)}`;
+        let likedUsers = JSON.parse(localStorage.getItem(videoLikesKey)) || [];
+
+        if (likeBtn.classList.contains('liked')) {
+            likeBtn.classList.remove('liked');
+            currentLikes = Math.max(0, currentLikes - 1);
+            likedUsers = likedUsers.filter(user => user !== currentViewer);
+        } else {
+            likeBtn.classList.add('liked');
+            currentLikes++;
+            if (!likedUsers.includes(currentViewer)) {
+                likedUsers.push(currentViewer);
+            }
+        }
+        
+        likeCountSpan.innerText = currentLikes;
+        localStorage.setItem(videoLikesKey, JSON.stringify(likedUsers));
+
+        currentVideo.likes = currentLikes;
+        localStorage.setItem('selectedVideo', JSON.stringify(currentVideo));
+        
+        const allVideos = JSON.parse(localStorage.getItem('app_videos')) || [];
+        const updatedVideos = allVideos.map(v => v.url === currentVideo.url ? { ...v, likes: currentLikes } : v);
+        localStorage.setItem('app_videos', JSON.stringify(updatedVideos));
+    }
+
+    // دالة لعرض الفيديوهات المقترحة في القائمة اليمنى
+    function renderSuggestions() {
+        const suggestionsGrid = document.getElementById('suggestionsGrid');
+        const allVideos = JSON.parse(localStorage.getItem('app_videos')) || [];
+
+        const suggestedVideos = allVideos.filter(v => v.url !== (currentVideo ? currentVideo.url : ''));
+
+        if (suggestedVideos.length === 0) {
+            suggestionsGrid.innerHTML = "<p style='color: #999; font-size: 14px;'>لا توجد مقترحات أخرى.</p>";
+            return;
+        }
+
+        suggestionsGrid.innerHTML = suggestedVideos.map((v) => {
+            const videoDataStr = JSON.stringify(v).replace(/"/g, '&quot;');
+            return `
+                <div class="suggested-card" onclick="playSuggestedVideo(${videoDataStr})">
+                    <video class="suggested-thumb" src="${v.url}"></video>
+                    <div class="suggested-info">
+                        <span class="suggested-video-title">${v.title || 'بدون عنوان'}</span>
+                        <span class="suggested-meta">
+                            <i class="fas fa-user" style="font-size: 10px;"></i> ${v.userName || 'مستخدم'}
+                        </span>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    function playSuggestedVideo(videoObject) {
+        currentVideo = videoObject;
+        localStorage.setItem('selectedVideo', JSON.stringify(videoObject));
+        renderMainVideo(videoObject);
+        renderSuggestions();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // نظام التعليقات
+    function loadComments(videoUrl) {
+        const allComments = JSON.parse(localStorage.getItem('app_comments')) || {};
+        const videoComments = allComments[videoUrl] || [];
+        
+        document.getElementById('commentsCount').innerText = videoComments.length;
+        const commentsList = document.getElementById('commentsList');
+
+        if (videoComments.length === 0) {
+            commentsList.innerHTML = "<p id='noCommentsText' style='color: #999; font-size: 14px;'>لا توجد تعليقات بعد. كن أول من يعلق!</p>";
+            return;
+        }
+
+        commentsList.innerHTML = videoComments.slice().reverse().map(c => `
+            <div class="comment-card">
+                <img class="comment-user-img" src="${c.userImg}" alt="avatar" onclick="goToProfile('${c.accountName}', '${c.userName}')">
+                <div class="comment-content">
+                    <div class="comment-user-meta" onclick="goToProfile('${c.accountName}', '${c.userName}')">
+                        ${c.userName} <span style="color:#777;">(${c.accountName})</span> <span>منذ قليل</span>
+                    </div>
+                    <div class="comment-text-body">${c.text}</div>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function addNewComment() {
+        if (!isUserLoggedIn()) {
+            showAuthModal('يجب ان تنشئ حساب لكي تتمكن تكتب تعليقات.');
+            return;
+        }
+
+        const input = document.getElementById('newCommentInput');
+        const commentText = input.value.trim();
+        
+        if (!commentText || !currentVideo) return;
+
+        const currentUserData = JSON.parse(localStorage.getItem('currentUser')) || {};
+
+        const newComment = {
+            text: commentText,
+            userName: currentUserData.userName || "مستخدم حالي",
+            accountName: currentUserData.accountName || "@user",
+            userImg: currentUserData.userImg || "https://via.placeholder.com/50/orange/white?text=Me",
+            timestamp: new Date().getTime()
+        };
+
+        const allComments = JSON.parse(localStorage.getItem('app_comments')) || {};
+        if (!allComments[currentVideo.url]) {
+            allComments[currentVideo.url] = [];
+        }
+        
+        allComments[currentVideo.url].push(newComment);
+        localStorage.setItem('app_comments', JSON.stringify(allComments));
+
+        input.value = '';
+        loadComments(currentVideo.url);
+    }
+</script>
+</body>
+</html>

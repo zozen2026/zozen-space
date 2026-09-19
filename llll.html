@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    
+    <style>
+        body { 
+            background: #0a0a0a; 
+            margin: 0; 
+            height: 100vh; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            /* دفع العناصر للثلث السفلي بدون الالتصاق بالحافة */
+            justify-content: flex-end; 
+            padding-bottom: 20vh; 
+            font-family: sans-serif;
+            position: relative;
+        }
+
+        /* زر الرجوع الدائري الأحمر - تم تعديله ليعود لصفحة create2.html مباشرة */
+        .back-nav-circle {
+            position: absolute;
+            top: 30px;
+            left: 30px;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: transparent;
+            border: 2px solid #e74c3c; 
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            opacity: 0.7;
+            transition: 0.3s ease;
+            text-decoration: none;
+            box-shadow: 0 0 10px rgba(231, 76, 60, 0.2);
+        }
+        .back-nav-circle:hover {
+            opacity: 1;
+            background: #e74c3c;
+            box-shadow: 0 0 15px rgba(231, 76, 60, 0.5);
+            transform: scale(1.05);
+        }
+        .back-arrow-left { 
+            width: 10px; 
+            height: 10px; 
+            border-left: 2px solid #fff; 
+            border-bottom: 2px solid #fff; 
+            transform: rotate(45deg); 
+            margin-left: 4px;
+        }
+
+        /* العين البرمجية - احترافية وبسيطة */
+        .eye-container { position: absolute; top: 30px; right: 30px; cursor: pointer; opacity: 0.7; transition: 0.3s; }
+        .eye-container:hover { opacity: 1; }
+        .eye-shape { width: 35px; height: 20px; border: 1.5px solid #666; border-radius: 50%; position: relative; }
+        .eye-pupil { width: 8px; height: 8px; background: #999; border-radius: 50%; position: absolute; left: 12px; top: 5px; }
+
+        /* حاوية الأزرار */
+        .ui-container { display: flex; gap: 30px; align-items: center; transition: opacity 0.4s; }
+        .hidden { opacity: 0; pointer-events: none; }
+
+        /* زر التسجيل */
+        .record-btn { width: 70px; height: 70px; border-radius: 50%; background: #ffffff; cursor: pointer; transition: 0.3s; border: 4px solid #333; }
+        .recording-state { background: #ffd700; border: 4px solid #fff; box-shadow: 0 0 20px #ffd700; }
+
+        /* زر الإيقاف */
+        .pause-btn { width: 50px; height: 50px; border-radius: 50%; border: 1.5px solid #555; display: none; align-items: center; justify-content: center; cursor: pointer; }
+        
+        /* الخط الاحترافي */
+        .status-line { position: absolute; bottom: 40px; width: 0; height: 1px; background: #444; transition: 0.5s; }
+        .active-line { width: 40%; background: #fff !important; }
+    </style>
+</head>
+<body>
+
+    <a href="create2.html" class="back-nav-circle">
+        <div class="back-arrow-left"></div>
+    </a>
+
+    <video id="hidden-preview" autoplay muted style="display:none;"></video>
+
+    <div class="eye-container" onclick="toggleView()">
+        <div class="eye-shape"><div class="eye-pupil"></div></div>
+    </div>
+
+    <div id="status-line" class="status-line"></div>
+
+    <div class="ui-container" id="ui">
+        <div class="record-btn" id="rec" onclick="handleRecord()"></div>
+        <div class="pause-btn" id="pause" onclick="togglePause()">
+            <div id="pause-icon1" style="width:2px; height:20px; background:white; margin:0 2px;"></div>
+            <div id="pause-icon2" style="width:2px; height:20px; background:white; margin:0 2px;"></div>
+        </div>
+    </div>
+
+    <script>
+        let isRecording = false;
+        let isHidden = false;
+        let mediaRecorder;
+        let recordedChunks = [];
+        let streamRef = null;
+
+        async function handleRecord() {
+            if (!isRecording) {
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+                    streamRef = stream;
+                    document.getElementById('hidden-preview').srcObject = stream;
+
+                    document.getElementById('rec').classList.add('recording-state');
+                    document.getElementById('pause').style.display = 'flex';
+                    isRecording = true;
+
+                    mediaRecorder = new MediaRecorder(stream);
+                    recordedChunks = [];
+
+                    mediaRecorder.ondataavailable = (e) => {
+                        if (e.data.size > 0) recordedChunks.push(e.data);
+                    };
+
+                    mediaRecorder.onstop = () => {
+                        const blob = new Blob(recordedChunks, { type: 'video/webm' });
+                        const reader = new FileReader();
+                        
+                        reader.onloadend = () => {
+                            sessionStorage.setItem("capturedVideo", reader.result);
+                            if (streamRef) {
+                                streamRef.getTracks().forEach(track => track.stop());
+                            }
+                            window.location.href = 'vvv.html';
+                        };
+                        reader.readAsDataURL(blob);
+                    };
+
+                    mediaRecorder.start();
+
+                } catch (err) { 
+                    alert("يجب السماح بالأذونات للبدء."); 
+                }
+            } else {
+                if (mediaRecorder && mediaRecorder.state !== "inactive") {
+                    mediaRecorder.stop();
+                }
+            }
+        }
+
+        function toggleView() {
+            isHidden = !isHidden;
+            document.getElementById('ui').classList.toggle('hidden', isHidden);
+            document.getElementById('status-line').classList.toggle('active-line', isHidden);
+        }
+
+        function togglePause() {
+            const i1 = document.getElementById('pause-icon1');
+            const i2 = document.getElementById('pause-icon2');
+            
+            if (i1.style.display !== 'none' && i1.style.borderLeft === "") {
+                i1.style.width = '0'; i1.style.height = '0'; i1.style.borderLeft = '15px solid white'; i1.style.borderTop = '10px solid transparent'; i1.style.borderBottom = '10px solid transparent'; i1.style.background = 'transparent';
+                i2.style.display = 'none';
+                
+                if (mediaRecorder && mediaRecorder.state === "recording") {
+                    mediaRecorder.pause();
+                }
+            } else {
+                i1.style.width = '2px'; i1.style.height = '20px'; i1.style.border = 'none'; i1.style.background = 'white';
+                i2.style.display = 'block';
+                
+                if (mediaRecorder && mediaRecorder.state === "paused") {
+                    mediaRecorder.resume();
+                }
+            }
+        }
+    </script>
+</body>
+</html>

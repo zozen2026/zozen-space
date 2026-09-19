@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>المنشورات - الترتيب الثلاثي</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <style>
+    body {
+      margin: 0;
+      font-family: sans-serif;
+      background: #F4EAE1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px 20px;
+    }
+
+    .sidebar {
+      position: fixed;
+      right: 0;
+      top: 0;
+      height: 100%;
+      width: 80px;
+      background: white;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding-top: 30px;
+      z-index: 2000;
+      box-shadow: -2px 0 10px rgba(0,0,0,0.1);
+    }
+    .sidebar a {
+      margin-bottom: 35px;
+      color: rgb(255, 136, 0);
+      font-size: 26px;
+      text-decoration: none;
+      transition: 0.3s;
+    }
+    .sidebar a:hover {
+      transform: scale(1.2);
+      color: #ffe0b2;
+    }
+
+    .container {
+      margin-right: 80px;
+      width: calc(100% - 100px);
+      max-width: 1100px;
+    }
+
+    h1 {
+      text-align: center;
+      color: #4a0e4e;
+      margin-bottom: 40px;
+    }
+
+    .posts-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 25px;
+      width: 100%;
+    }
+
+    .yellow-outer-border {
+      background: #FFD700; 
+      padding: 6px;       
+      border-radius: 22px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+      transition: transform 0.3s ease;
+    }
+    .yellow-outer-border:hover {
+      transform: translateY(-5px);
+    }
+
+    .white-inner-border {
+      background: #ffffff; 
+      padding: 6px;       
+      border-radius: 18px;
+      height: 100%;
+      box-sizing: border-box;
+    }
+
+    .post-card {
+      background: #fcfbfa; 
+      border-radius: 12px;
+      padding: 20px;
+      height: 100%;
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .post-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 15px;
+      border-bottom: 1px solid #f4eae1;
+      padding-bottom: 10px;
+    }
+
+    .profile-link {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    .post-avatar {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      border: 2px solid orange;
+      object-fit: cover;
+    }
+
+    .user-info {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .username-top {
+      font-weight: bold;
+      color: #333;
+      font-size: 15px;
+      margin: 0;
+    }
+
+    .accountname-bottom {
+      color: #777;
+      font-size: 12px;
+      margin: 2px 0 0 0;
+    }
+
+    .post-body {
+      font-size: 16px;
+      color: #222;
+      line-height: 1.5;
+      margin: 10px 0;
+      flex-grow: 1;
+    }
+
+    .post-actions {
+      display: flex;
+      gap: 15px;
+      border-top: 1px solid #f4eae1;
+      border-bottom: 1px solid #f4eae1;
+      padding: 10px 0;
+      margin-top: 10px;
+    }
+
+    .action-btn {
+      background: none;
+      border: none;
+      color: #555;
+      cursor: pointer;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      transition: 0.2s;
+    }
+
+    .action-btn:hover {
+      color: rgb(255, 136, 0);
+    }
+
+    .action-btn.liked {
+      color: rgb(255, 136, 0) !important;
+      font-weight: bold;
+    }
+
+    .tips-box {
+      background-color: #fff9e6;
+      border-right: 4px solid #ff9800;
+      padding: 8px 12px;
+      border-radius: 4px;
+      font-size: 12px;
+      color: #6d4c41;
+      margin-top: 15px;
+    }
+
+    .no-posts {
+      grid-column: span 3;
+      text-align: center;
+      padding: 50px;
+      background: white;
+      border-radius: 15px;
+      color: #777;
+      font-size: 18px;
+    }
+
+    .comments-modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      z-index: 9999;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal-content {
+      background: white;
+      width: 90%;
+      max-width: 500px;
+      border-radius: 15px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      max-height: 80vh;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #eee;
+      padding-bottom: 10px;
+    }
+
+    .modal-title {
+      font-weight: bold;
+      color: #4a0e4e;
+      margin: 0;
+    }
+
+    .close-modal {
+      background: none;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      color: #999;
+    }
+
+    .comments-list {
+      flex-grow: 1;
+      overflow-y: auto;
+      margin: 15px 0;
+      padding-right: 5px;
+    }
+
+    .comment-item {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 15px;
+      align-items: flex-start;
+      border-bottom: 1px dotted #f4eae1;
+      padding-bottom: 8px;
+    }
+
+    .comment-avatar {
+      width: 35px;
+      height: 35px;
+      border-radius: 50%;
+      border: 1px solid orange;
+      object-fit: cover;
+    }
+
+    .comment-details {
+      background: #f9f6f0;
+      padding: 8px 12px;
+      border-radius: 10px;
+      flex-grow: 1;
+    }
+
+    .comment-author-link {
+      text-decoration: none;
+      color: #333;
+      font-weight: bold;
+      font-size: 13px;
+      display: block;
+      margin-bottom: 3px;
+    }
+
+    .comment-author-link:hover {
+      color: rgb(255, 136, 0);
+    }
+
+    .comment-text {
+      font-size: 13px;
+      color: #444;
+      margin: 0;
+    }
+
+    .comment-input-bar {
+      display: flex;
+      gap: 10px;
+      border-top: 1px solid #eee;
+      padding-top: 10px;
+    }
+
+    .comment-input {
+      flex-grow: 1;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 20px;
+      outline: none;
+      font-size: 14px;
+    }
+
+    .send-comment-btn {
+      background: rgb(255, 136, 0);
+      color: white;
+      border: none;
+      padding: 0 15px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    @media (max-width: 950px) {
+      .posts-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 650px) {
+      .posts-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="sidebar">
+    <a href="inndex.html"><i class="fas fa-house"></i></a>
+    <a href="profile2.html"><i class="fas fa-circle-user"></i></a>
+    <a href="bell2.html"><i class="fas fa-bell"></i></a>
+    <a href="app.html"><i class="fas fa-external-link-alt"></i></a>
+  </div>
+
+  <div class="container">
+    <h1>المنشورات الحالية</h1>
+    <div class="posts-grid" id="postsContainer"></div>
+  </div>
+
+  <a href="jjjj.html" style="
+      position: fixed;
+      bottom: 20px;
+      left: 20px;
+      z-index: 9999;
+      display: inline-block;
+      background-color: #FFD700;
+      color: #000000;
+      text-decoration: none;
+      padding: 10px 30px;
+      font-family: sans-serif;
+      font-weight: bold;
+      border-radius: 4px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+  ">
+      ملاحظات تطبيق
+  </a>
+
+  <div class="comments-modal" id="commentsModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title">التعليقات</h3>
+        <button class="close-modal" onclick="closeComments()">&times;</button>
+      </div>
+      <div class="comments-list" id="modalCommentsList"></div>
+      <div class="comment-input-bar">
+        <input type="text" class="comment-input" id="commentInput" placeholder="اكتب تعليقاً...">
+        <button class="send-comment-btn" id="sendCommentBtn">نشر</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const tipsList = [
+      "نصيحة: حافظ على تفاعلك مع المتابعين لزيادة الوصول.",
+      "نصيحة: العناوين المختصرة والمباشرة تحصد قراءات أكثر.",
+      "نصيحة: احرص على استخدام صورة حساب معبرة تزيد من فخامة بروفايلك."
+    ];
+
+    let currentPostIndex = null;
+
+    window.onload = () => {
+      renderPosts();
+    };
+
+    function renderPosts() {
+      const postsContainer = document.getElementById('postsContainer');
+      const posts = JSON.parse(localStorage.getItem('myPosts')) || [];
+
+      if (posts.length === 0) {
+        postsContainer.innerHTML = '<div class="no-posts">لا توجد منشورات حتى الآن. اذهب لصفحة النشر وأضف عنوانك الأول!</div>';
+        return;
+      }
+
+      postsContainer.innerHTML = posts.map((post, index) => {
+        const randomTip = tipsList[index % tipsList.length];
+        const likesCount = post.likesCount || 0;
+        const commentsCount = post.comments ? post.comments.length : 0;
+        
+        const isLiked = post.isLikedByUser ? 'liked' : '';
+        
+        const profileUrl = `jndfsl.html?username=${encodeURIComponent(post.username)}&account=${encodeURIComponent(post.accountName)}&pic=${encodeURIComponent(post.profilePic)}`;
+
+        return `
+          <div class="yellow-outer-border">
+            <div class="white-inner-border">
+              <div class="post-card">
+                <div class="post-header">
+                  <a href="${profileUrl}" class="profile-link">
+                    <img src="${post.profilePic}" class="post-avatar" alt="Avatar">
+                    <div class="user-info">
+                      <span class="username-top">${post.username}</span>
+                      <span class="accountname-bottom">${post.accountName}</span>
+                    </div>
+                  </a>
+                </div>
+                <div class="post-body">
+                  ${post.text}
+                </div>
+                
+                <div class="post-actions">
+                  <button class="action-btn ${isLiked}" onclick="toggleLike(${index})">
+                    <i class="fas fa-heart"></i> <span>إعجاب (${likesCount})</span>
+                  </button>
+                  <button class="action-btn" onclick="openComments(${index})">
+                    <i class="fas fa-comment"></i> <span>تعليق (${commentsCount})</span>
+                  </button>
+                </div>
+
+                <div class="tips-box">
+                  <i class="fas fa-lightbulb" style="color: #ff9800; margin-left: 5px;"></i>
+                  ${randomTip}
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function toggleLike(index) {
+      const posts = JSON.parse(localStorage.getItem('myPosts')) || [];
+      const post = posts[index];
+
+      if (!post.isLikedByUser) {
+        post.isLikedByUser = true;
+        post.likesCount = (post.likesCount || 0) + 1;
+      } else {
+        post.isLikedByUser = false;
+        post.likesCount = Math.max(0, (post.likesCount || 0) - 1);
+      }
+
+      posts[index] = post;
+      localStorage.setItem('myPosts', JSON.stringify(posts));
+      renderPosts();
+    }
+
+    function openComments(index) {
+      currentPostIndex = index;
+      const modal = document.getElementById('commentsModal');
+      modal.style.display = 'flex';
+      renderComments();
+    }
+
+    function closeComments() {
+      const modal = document.getElementById('commentsModal');
+      modal.style.display = 'none';
+      currentPostIndex = null;
+    }
+
+    function renderComments() {
+      if (currentPostIndex === null) return;
+      const posts = JSON.parse(localStorage.getItem('myPosts')) || [];
+      const post = posts[currentPostIndex];
+      const commentsList = document.getElementById('modalCommentsList');
+      const comments = post.comments || [];
+
+      if (comments.length === 0) {
+        commentsList.innerHTML = '<p style="text-align:center; color:#999; font-size:13px;">لا توجد تعليقات بعد.</p>';
+        return;
+      }
+
+      commentsList.innerHTML = comments.map(comment => {
+        const commentProfileUrl = `jndfsl.html?username=${encodeURIComponent(comment.username)}&account=${encodeURIComponent(comment.accountName)}&pic=${encodeURIComponent(comment.profilePic)}`;
+        
+        return `
+          <div class="comment-item">
+            <img src="${comment.profilePic}" class="comment-avatar" alt="Avatar">
+            <div class="comment-details">
+              <a href="${commentProfileUrl}" class="comment-author-link">${comment.username}</a>
+              <p class="comment-text">${comment.text}</p>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    document.getElementById('sendCommentBtn').addEventListener('click', () => {
+      const input = document.getElementById('commentInput');
+      const text = input.value.trim();
+      if (!text || currentPostIndex === null) return;
+
+      // جلب بيانات الحساب الحالي المُسجل للتعليق
+      const currentUser = JSON.parse(localStorage.getItem('userAccount')) || {
+        user: "زائر",
+        accountName: "مستخدم افتراضي"
+      };
+      const currentPic = localStorage.getItem('profilePic') || "https://cdn-icons-png.flaticon.com/512/149/149071.png";
+
+      const posts = JSON.parse(localStorage.getItem('myPosts')) || [];
+      const post = posts[currentPostIndex];
+
+      if (!post.comments) post.comments = [];
+
+      // استخدام بيانات الشخص الذي أرسل التعليق الآن
+      const newComment = {
+        username: currentUser.user,
+        accountName: currentUser.accountName,
+        profilePic: currentPic, 
+        text: text
+      };
+
+      post.comments.push(newComment);
+      localStorage.setItem('myPosts', JSON.stringify(posts));
+      
+      input.value = '';
+      renderComments();
+      renderPosts(); 
+    });
+  </script>
+</body>
+</html>
