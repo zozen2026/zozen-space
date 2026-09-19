@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نشر الفيديو - TTTT2</title>
+    <style>
+        body {
+            background-color: #121212;
+            color: white;
+            font-family: sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+        .box {
+            background: #1e1e1e;
+            padding: 30px;
+            border-radius: 12px;
+            width: 350px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        }
+        .preview-box {
+            width: 100%;
+            height: 220px;
+            background: #252525;
+            border-radius: 8px;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .preview-box video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        input {
+            width: 100%;
+            padding: 12px;
+            background: #2a2a2a;
+            border: 1px solid #444;
+            color: white;
+            border-radius: 6px;
+            outline: none;
+            box-sizing: border-box;
+        }
+        button {
+            background: #ff6600;
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        button:hover {
+            opacity: 0.9;
+        }
+    </style>
+</head>
+<body>
+
+<div class="box">
+    <h3>معاينة الفيديو القادم من vvv2:</h3>
+    <div class="preview-box">
+        <video id="autoPreview" controls muted></video>
+    </div>
+
+    <h3>اكتب العنوان:</h3>
+    <input type="text" id="vTitle" placeholder="عنوان الفيديو...">
+
+    <button onclick="publish()">نشر إلى index و inndex</button>
+</div>
+
+<script>
+    let videoUrl = "";
+
+    // سحب وقراءة الفيديو القادم من vvv2.html تلقائياً عند فتح الصفحة
+    window.addEventListener('DOMContentLoaded', () => {
+        videoUrl = localStorage.getItem('vvv2AutoVideo');
+        const previewVideo = document.getElementById('autoPreview');
+
+        if (videoUrl) {
+            previewVideo.src = videoUrl;
+        } else {
+            alert("لا يوجد فيديو جاهز. يرجى الذهاب إلى vvv2.html أولاً!");
+        }
+    });
+
+    function publish() {
+        let title = document.getElementById('vTitle').value.trim();
+
+        if (!title) {
+            alert('الرجاء كتابة العنوان أولاً!');
+            return;
+        }
+        if (!videoUrl) {
+            alert('لا يوجد فيديو مرفق!');
+            return;
+        }
+
+        // حفظ الفيديو في التخزين المحلي المشترك لكي تراه كل الملفات
+        let posts = JSON.parse(localStorage.getItem('publishedVideos')) || [];
+        posts.push({ title: title, url: videoUrl });
+        localStorage.setItem('publishedVideos', JSON.stringify(posts));
+
+        // الانتقال إلى الصفحة الرئيسية (index.html) بعد النشر
+        window.location.href = 'inndex.html';
+    }
+</script>
+
+</body>
+</html>

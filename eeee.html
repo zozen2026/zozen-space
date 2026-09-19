@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>قص الصورة</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" rel="stylesheet">
+    <style>
+        body { font-family: sans-serif; text-align: center; background: #F4EAE1; padding: 20px; }
+        .container { max-width: 500px; margin: auto; }
+        img { max-width: 100%; }
+        #imageToCrop { display: block; max-width: 100%; }
+        .controls { margin-top: 20px; }
+        button { padding: 10px 25px; cursor: pointer; background: orange; border: none; color: white; border-radius: 8px; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h3>اضبط الصورة داخل الدائرة</h3>
+        <input type="file" id="uploadInput" accept="image/*">
+        <div style="margin-top: 20px;">
+            <img id="imageToCrop" src="" style="display:none;">
+        </div>
+        <div class="controls">
+            <button onclick="saveResult()">اعتماد الصورة</button>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+    <script>
+        let cropper;
+        const image = document.getElementById('imageToCrop');
+        const input = document.getElementById('uploadInput');
+
+        // عند اختيار صورة
+        input.onchange = (e) => {
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                image.src = event.target.result;
+                image.style.display = 'block';
+                
+                // تهيئة أداة القص
+                if (cropper) cropper.destroy();
+                cropper = new Cropper(image, {
+                    aspectRatio: 1, // مربع لضمان الدائرة
+                    viewMode: 1,
+                    dragMode: 'move',
+                    // هذا هو الجزء الذي يجعل القص دائرياً
+                    ready: function () {
+                        document.querySelector('.cropper-view-box').style.borderRadius = '50%';
+                        document.querySelector('.cropper-face').style.borderRadius = '50%';
+                    }
+                });
+            };
+            reader.readAsDataURL(e.target.files[0]);
+        };
+
+        // عند حفظ النتيجة
+        function saveResult() {
+            if (!cropper) return;
+            
+            // استخراج الجزء الدائري
+            const canvas = cropper.getCroppedCanvas({
+                width: 300,
+                height: 300,
+                fillColor: '#fff',
+            });
+            
+            const croppedImage = canvas.toDataURL('image/png');
+            localStorage.setItem('tempSelectedPic', croppedImage);
+            window.location.href = 'profile2.html';
+        }
+    </script>
+</body>
+</html>

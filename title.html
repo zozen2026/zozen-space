@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>صفحة النشر</title>
+    
+    <!-- Supabase Library -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <style>
+        body { background: #0a0a0a; color: #fff; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; padding: 20px; min-height: 100vh; justify-content: center; }
+        #videoPreview { width: 90%; max-width: 300px; height: 180px; object-fit: cover; border-radius: 8px; background: #000; margin-bottom: 20px; border: 1px solid #333; }
+        #title-input { width: 90%; max-width: 300px; padding: 12px; background: #1a1a1a; border-radius: 6px; border: 2px solid #555; color: #fff; text-align: center; margin-bottom: 20px; outline: none; box-sizing: border-box; }
+        #publish-btn { width: 90%; max-width: 300px; padding: 12px; background-color: transparent; border: 2px solid #ffd700; color: #ffd700; border-radius: 6px; cursor: pointer; opacity: 0; pointer-events: none; transition: 0.4s; font-weight: bold; }
+        #publish-btn.show { opacity: 1; pointer-events: auto; background: #ffd700; color: #000; }
+        #publish-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+    </style>
+</head>
+<body>
+
+    <video id="videoPreview" controls></video>
+    <input type="text" id="title-input" placeholder="اكتب العنوان هنا..." oninput="checkInput()">
+    <button id="publish-btn">نشر الفيديو</button>
+
+    <script>
+        // إعدادات اتصال Supabase
+        const SUPABASE_URL = "https://lzvtnfdgynwczrkwlwhf.supabase.co";
+        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx6dnRuZmRneW53Y3pya3dsd2hmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkxNDIxMTEsImV4cCI6MjEwNDcxODExMX0.w2hNlJ4SszyMBkUVjr1qiWNTTPxHMHkM9YOFtVP-pVI";
+
+        if (!window.supabaseClient) {
+            window.supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        }
+
+        // سحب الرابط المؤقت للفيديو
+        const videoData = sessionStorage.getItem('selectedVideoData');
+        const videoPreview = document.getElementById('videoPreview');
+
+        if (videoData) {
+            videoPreview.src = videoData;
+        } else {
+            alert("لم يتم العثور على فيديو!");
+            window.location.href = 'inndex.html';
+        }
+
+        function checkInput() {
+            const input = document.getElementById('title-input');
+            const btn = document.getElementById('publish-btn');
+            btn.classList.toggle('show', input.value.trim().length > 0);
+        }
+
+        document.getElementById('publish-btn').addEventListener('click', async () => {
+            const btn = document.getElementById('publish-btn');
+            const title = document.getElementById('title-input').value;
+            const userData = JSON.parse(localStorage.getItem('userAccount')) || { user: "مستخدم", accountName: "الاسم الافتراضي" };
+
+            btn.innerText = "جاري الفحص والرفع...";
+            btn.disabled = true;
+
+            try {
+                // 1. تحويل رابط الـ Blob إلى ملف قابل للرفع سحابياً
+                const response = await fetch(videoData);
+                const videoBlob = await response.blob();
+
+                // 2. مانع دقة 4K: فحص أبعاد الفيديو قبل الرفع
+                const checkVideo = document.createElement('video');
+                checkVideo.preload = 'metadata';
+                
+                const is4K = await new Promise((resolve) => {
+                    checkVideo.onloadedmetadata = () => {
+                        window.URL.revokeObjectURL(checkVideo.src);
+                        const width = checkVideo.videoWidth;
+                        const height = checkVideo.videoHeight;
+                        if (width >= 3840 || height >= 2160) {
+                            resolve(true);
+                        } else {
+                            resolve(false);
+                        }
+                    };
+                    checkVideo.onerror = () => resolve(false);
+                    checkVideo.src = videoData;
+                });
+
+                if (is4K) {
+                    alert("عذراً، الفيديوهات بدقة 4K محظورة ولا يمكن نشرها!");
+                    btn.innerText = "نشر الفيديو";
+                    btn.disabled = false;
+                    return;
+                }
+
+                // 3. رفع الفيديو إلى سحابة Supabase Storage (سلة videos)
+                const fileName = `${Date.now()}_video.mp4`;
+                const { data: uploadData, error: uploadError } = await window.supabaseClient.storage
+                    .from('videos')
+                    .upload(fileName, videoBlob);
+
+                if (uploadError) throw uploadError;
+
+                // 4. جلب الرابط العام الثابت للفيديو المرفوع
+                const { data: publicUrlData } = window.supabaseClient.storage
+                    .from('videos')
+                    .getPublicUrl(fileName);
+
+                const publicUrl = publicUrlData.publicUrl;
+
+                // 5. حفظ معلومات الفيديو في جدول قاعدة البيانات مع مراعاة الحروف الصغيرة
+                const { error: dbError } = await window.supabaseClient
+                    .from('videos')
+                    .insert([
+                        { 
+                            title: title, 
+                            url: publicUrl, 
+                            username: userData.user,      
+                            accountname: userData.accountName 
+                        }
+                    ]);
+
+                if (dbError) throw dbError;
+
+                // التخزين المحلي الاحتياطي لضمان التوافق مع باقي الصفحات
+                const newVideo = {
+                    url: publicUrl, 
+                    title: title,
+                    userName: userData.user,
+                    accountName: userData.accountName
+                };
+                const videos = JSON.parse(localStorage.getItem('app_videos')) || [];
+                videos.push(newVideo);
+                localStorage.setItem('app_videos', JSON.stringify(videos));
+                
+                // الانتقال للصفحة التالية بعد النجاح
+                window.location.href = 'jndfsl.html';
+
+            } catch (err) {
+                console.error(err);
+                alert("حدث خطأ أثناء الرفع السحابي: " + (err.message || err));
+                btn.innerText = "نشر الفيديو";
+                btn.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>
