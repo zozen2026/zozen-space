@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>معاينة الفيديو الطولي</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #111;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+            font-family: Arial, sans-serif;
+        }
+
+        /* حاوية مستطيل طولي إجباري بأبعاد الهواتف (9:16) */
+        .video-box {
+            position: relative;
+            width: 100%;
+            max-width: 400px;
+            height: 90vh;
+            aspect-ratio: 9 / 16;
+            background-color: #000;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* الفيديو يملأ المستطيل الطولي تماماً */
+        #previewVideo {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* زر الرجوع */
+        .back-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: #ff3b30;
+            border: none;
+            cursor: pointer;
+            z-index: 10;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            transition: transform 0.2s;
+        }
+
+        .back-arrow {
+            width: 10px;
+            height: 10px;
+            border-top: 3px solid #fff;
+            border-right: 3px solid #fff;
+            transform: rotate(45deg);
+            margin-right: -2px;
+        }
+
+        /* زر الصح البرمجي */
+        .confirm-btn {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background-color: #34c759;
+            border: none;
+            cursor: pointer;
+            z-index: 10;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+            transition: transform 0.2s;
+        }
+
+        /* رسم الصح بـ CSS */
+        .checkmark {
+            width: 12px;
+            height: 24px;
+            border: solid #fff; 
+            border-width: 0 4px 4px 0;
+            transform: rotate(45deg);
+            margin-top: -4px;
+        }
+
+        .back-btn:active { transform: scale(0.9); }
+        .confirm-btn:active { transform: scale(0.9) translateX(-50%); }
+    </style>
+</head>
+<body>
+
+    <div class="video-box">
+        <button class="back-btn" onclick="goBack()" title="رجوع">
+            <div class="back-arrow"></div>
+        </button>
+
+        <video id="previewVideo" autoplay loop playsinline controls></video>
+
+        <button class="confirm-btn" onclick="goToNextPage()" title="تأكيد">
+            <div class="checkmark"></div>
+        </button>
+    </div>
+
+    <script>
+        // استلام البيانات وتشغيل الفيديو فوراً عند تحميل الصفحة
+        window.addEventListener('DOMContentLoaded', () => {
+            const videoData = sessionStorage.getItem('recordedVideoData');
+            const videoElement = document.getElementById('previewVideo');
+
+            if (videoData) {
+                videoElement.src = videoData;
+                videoElement.play().catch(err => console.log("تحتاج الشاشة تفاعل للتشغيل التلقائي"));
+                
+                // حفظ الفيديو تلقائياً لكي يتمكن TTTT2 من سحبه وقراءته
+                localStorage.setItem('vvv2AutoVideo', videoData);
+            } else {
+                alert("لم يتم العثور على الفيديو. يرجى العودة للخلف وتسجيل فيديو جديد.");
+            }
+        });
+
+        function goBack() {
+            window.history.back();
+        }
+
+        function goToNextPage() {
+            window.location.href = 'TTTT2.html';
+        }
+    </script>
+</body>
+</html>

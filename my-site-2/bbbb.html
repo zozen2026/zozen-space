@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f6f9;
+    color: #333;
+    padding: 20px;
+    line-height: 1.6;
+  }
+  .back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background-color: #3498db;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    font-size: 16px;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-bottom: 20px;
+    text-decoration: none;
+    font-weight: bold;
+  }
+  .back-btn:hover {
+    background-color: #2980b9;
+  }
+  .lang-section {
+    background: #ffffff;
+    border-radius: 8px;
+    padding: 15px 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+  .lang-title {
+    font-size: 1.2rem;
+    font-weight: bold;
+    margin-bottom: 10px;
+    padding-bottom: 5px;
+    border-bottom: 2px solid;
+  }
+  p {
+    margin: 8px 0;
+  }
+  /* ألوان مخصصة لكل لغة */
+  .lang-en { border-color: #1abc9c; }
+  .lang-en .lang-title { color: #1abc9c; }
+
+  .lang-ar { border-color: #e74c3c; }
+  .lang-ar .lang-title { color: #e74c3c; }
+
+  .lang-fr { border-color: #3498db; }
+  .lang-fr .lang-title { color: #3498db; }
+
+  .lang-it { border-color: #e67e22; }
+  .lang-it .lang-title { color: #e67e22; }
+
+  .lang-ko { border-color: #9b59b6; }
+  .lang-ko .lang-title { color: #9b59b6; }
+
+  .lang-es { border-color: #f1c40f; }
+  .lang-es .lang-title { color: #d4ac0d; }
+
+  .lang-fa { border-color: #2ecc71; }
+  .lang-fa .lang-title { color: #2ecc71; }
+
+  .lang-zh { border-color: #e84118; }
+  .lang-zh .lang-title { color: #e84118; }
+
+  .lang-ru { border-color: #353b48; }
+  .lang-ru .lang-title { color: #353b48; }
+
+  .lang-de { border-color: #fbc531; }
+  .lang-de .lang-title { color: #e1b12c; }
+
+  .lang-nl { border-color: #ff7979; }
+  .lang-nl .lang-title { color: #eb4d4b; }
+
+  .lang-pl { border-color: #7d5fff; }
+  .lang-pl .lang-title { color: #7d5fff; }
+
+  .lang-pt { border-color: #05c46b; }
+  .lang-pt .lang-title { color: #05c46b; }
+
+  .lang-sv { border-color: #0fbcf9; }
+  .lang-sv .lang-title { color: #0fbcf9; }
+
+  .lang-el { border-color: #48dbfb; }
+  .lang-el .lang-title { color: #0abde3; }
+</style>
+</head>
+<body>
+
+<!-- زر الرجوع -->
+<button onclick="history.back()" class="back-btn">
+  <span style="font-size: 20px;">&#8592;</span> 
+</button>
+
+<!-- English -->
+<div class="lang-section lang-en">
+  <div class="lang-title">English</div>
+  <p><strong>Instant Access on Correct Passkey:</strong> When another device enters the correct account passkey, it logs into the account immediately without sending you a verification message to approve the login from another device (it logs in directly upon entering the correct passkey).</p>
+  <p><strong>Approval Required Before Access:</strong> When another device enters the correct account passkey, a prompt will be sent to you asking for your approval to allow the other device to access the account after entering the correct passkey (you can decline).</p>
+  <p><strong>Block Account Access:</strong> Even if the account credentials are entered correctly, access to the account will never be granted.</p>
+</div>
+
+<!-- Arabic -->
+<div class="lang-section lang-ar">
+  <div class="lang-title">العربية</div>
+  <p><strong>دخول فوراً بعد إدخال مفتاح بشكل صحيح:</strong> هي عندما في جهاز آخر يتم إدخال مفتاح دخول الحساب الصحيح يدخل الى الحساب دون رسالة تأتيك لأخذ موافقتك على دخول جهاز آخر الحساب (يدخل الحساب إذا أدخل مفتاح الدخول بشكل صحيح دون رسالة تأتيك لأخذ موافقتك على دخوله).</p>
+  <p><strong>طلب موافقة قبل الدخول:</strong> هي عندما في جهاز آخر يتم إدخال مفتاح دخول الحساب الصحيح ستأتي رسالة لأخذ موافقتك على دخول جهاز اخر للحساب بعدما يدخل مفتاح الدخول الصحيح (يمكنك الرفض).</p>
+  <p><strong>منع دخول للحساب:</strong> حتى لو تم كتابة بيانات الحساب بشكل صحيح لن يتم دخول الحساب ابداً.</p>
+</div>
+
+<!-- Français -->
+<div class="lang-section lang-fr">
+  <div class="lang-title">Français (French)</div>
+  <p><strong>Accès immédiat après saisie de la clé d'accès :</strong> Lorsqu'un autre appareil saisit la bonne clé d'accès du compte, il se connecte immédiatement au compte sans vous envoyer de message de vérification pour approuver la connexion (la connexion s'effectue directement dès que la clé correcte est entrée).</p>
+  <p><strong>Demande d'approbation avant l'accès :</strong> Lorsqu'un autre appareil saisit la bonne clé d'accès, une notification vous est envoyée pour demander votre accord afin d'autoriser cet autre appareil à accéder au compte après la saisie de la clé correcte (vous pouvez refuser).</p>
+  <p><strong>Bloquer l'accès au compte :</strong> Même si les identifiants du compte sont saisis correctement, l'accès au compte ne sera jamais accordé.</p>
+</div>
+
+<!-- Italiano -->
+<div class="lang-section lang-it">
+  <div class="lang-title">Italiano (Italian)</div>
+  <p><strong>Accesso immediato con chiave d'accesso corretta:</strong> Quando un altro dispositivo inserisce la chiave d'accesso corretta dell'account, effettua l'accesso immediatamente senza inviarti alcun messaggio di verifica per approvare il login da un altro dispositivo (l'accesso avviene direttamente non appena viene inserita la chiave corretta).</p>
+  <p><strong>Richiesta di approvazione prima dell'accesso:</strong> Quando un altro dispositivo inserisce la chiave d'accesso corretta, ti verrà inviato un messaggio per chiedere la tua approvazione per consentire l'accesso al nuovo dispositivo dopo l'inserimento della chiave corretta (puoi rifiutare).</p>
+  <p><strong>Blocco accesso all'account:</strong> Anche se le credenziali dell'account vengono inserite correttamente, l'accesso non verrà mai consentito.</p>
+</div>
+
+<!-- 한국어 -->
+<div class="lang-section lang-ko">
+  <div class="lang-title">한국어 (Korean)</div>
+  <p><strong>올바른 패스키 입력 시 즉시 로그인:</strong> 다른 기기에서 올바른 계정 패스키를 입력하면, 다른 기기의 로그인을 승인해 달라는 확인 메시지가 전송되지 않고 즉시 계정에 로그인됩니다(올바른 패스키를 입력하면 바로 로그인됨).</p>
+  <p><strong>로그인 전 승인 요청:</strong> 다른 기기에서 올바른 계정 패스키를 입력하면, 올바른 패스키 입력 후 해당 기기의 계정 로그인을 승인할지 묻는 메시지가 귀하에게 전송됩니다(거절할 수 있음).</p>
+  <p><strong>계정 액세스 차단:</strong> 계정 자격 증명이 올바르게 입력되더라도 절대 계정에 로그인할 수 없습니다.</p>
+</div>
+
+<!-- Español -->
+<div class="lang-section lang-es">
+  <div class="lang-title">Español (Mexican)</div>
+  <p><strong>Acceso inmediato al ingresar la llave correcta:</strong> Es cuando en otro dispositivo se ingresa la llave de acceso correcta de la cuenta y entra al instante sin que te llegue un mensaje pidiendo tu aprobación para iniciar sesión en otro dispositivo (entra a la cuenta si se introduce la llave de acceso correcta sin enviarte mensaje de confirmación).</p>
+  <p><strong>Solicitar aprobación antes de entrar:</strong> Es cuando en otro dispositivo se ingresa la llave de acceso correcta de la cuenta y te llegará un mensaje pidiendo tu aprobación para permitir que el otro dispositivo acceda a la cuenta después de ingresar la llave correcta (puedes rechazarlo).</p>
+  <p><strong>Bloquear acceso a la cuenta:</strong> Aunque los datos de la cuenta se escriban correctamente, nunca se podrá iniciar sesión.</p>
+</div>
+
+<!-- فارسی -->
+<div class="lang-section lang-fa">
+  <div class="lang-title">فارسی (Persian / Iranian)</div>
+  <p><strong>ورود فوری پس از ورود کلید صحیح:</strong> هنگامی که دستگاه دیگری کلید ورود صحیح حساب را وارد می‌کند، بدون اینکه پیامی برای دریافت تأییدیه شما جهت ورود دستگاه دیگر به حساب ارسال شود، مستقیماً وارد حساب می‌شود (اگر کلید ورود به‌درستی وارد شود، بدون پیام تأیید وارد حساب می‌شود).</p>
+  <p><strong>درخواست تأیید قبل از ورود:</strong> هنگامی که دستگاه دیگری کلید ورود صحیح حساب را وارد می‌کند، پس از ورود کلید صحیح، پیامی برای گرفتن تأییدیه شما جهت ورود دستگاه دیگر به حساب ارسال می‌شود (می‌توانید رد کنید).</p>
+  <p><strong>مسدود کردن ورود به حساب:</strong> حتی اگر اطلاعات حساب به درستی وارد شود، به هیچ وجه اجازه ورود به حساب داده نخواهد شد.</p>
+</div>
+
+<!-- 中文 -->
+<div class="lang-section lang-zh">
+  <div class="lang-title">中文 (Chinese)</div>
+  <p><strong>输入正确密钥后立即登录：</strong> 当其他设备输入正确的账户密钥时，它会直接登录账户，而不会向您发送要求批准其他设备登录的验证消息（只要输入正确的密钥就会直接登录）。</p>
+  <p><strong>登录前请求批准：</strong> 当其他设备输入正确的账户密钥时，系统会向您发送一条消息，在正确输入密钥后征得您对其他设备登录账户的批准（您可以拒绝）。</p>
+  <p><strong>阻止账户访问：</strong> 即使正确输入了账户凭据，也绝对无法登录账户。</p>
+</div>
+
+<!-- Русский -->
+<div class="lang-section lang-ru">
+  <div class="lang-title">Русский (Russian)</div>
+  <p><strong>Мгновенный вход при правильном ключе доступа:</strong> Когда другое устройство вводит правильный ключ доступа к учетной записи, оно сразу входит в аккаунт без отправки вам сообщения с запросом на подтверждение входа с другого устройства (вход происходит сразу после ввода правильного ключа).</p>
+  <p><strong>Запрос подтверждения перед входом:</strong> Когда другое устройство вводит правильный ключ доступа, вам отправляется сообщение с запросом на подтверждение входа этого устройства в аккаунт после ввода правильного ключа (вы можете отклонить).</p>
+  <p><strong>Блокировка доступа к аккаунту:</strong> Даже если учетные данные будут введены правильно, доступ к аккаунту предоставлен не будет.</p>
+</div>
+
+<!-- Deutsch -->
+<div class="lang-section lang-de">
+  <div class="lang-title">Deutsch (German)</div>
+  <p><strong>Sofortiger Zugriff bei korrigiertem Passkey:</strong> Wenn ein anderes Gerät den korrekten Account-Passkey eingibt, meldet es sich sofort an, ohne dass eine Benachrichtigung zur Bestätigung des Logins an Sie gesendet wird (der Login erfolgt direkt nach Eingabe des korrekten Passkeys).</p>
+  <p><strong>Genehmigung vor dem Zugriff anfordern:</strong> Wenn ein anderes Gerät den korrekten Account-Passkey eingibt, erhalten Sie eine Nachricht, in der Sie um Zustimmung gebeten werden, damit das andere Gerät nach der Passkey-Eingabe auf das Konto zugreifen kann (Sie können ablehnen).</p>
+  <p><strong>Kontozugriff blockieren:</strong> Selbst wenn die Kontodaten korrekt eingegeben werden, wird der Zugriff auf das Konto niemals gewährt.</p>
+</div>
+
+<!-- Nederlands -->
+<div class="lang-section lang-nl">
+  <div class="lang-title">Nederlands (Dutch)</div>
+  <p><strong>Directe toegang bij correcte toegangssleutel:</strong> Wanneer een ander apparaat de juiste toegangssleutel van het account invoert, logt het direct in op het account zonder dat er een verificatiebericht naar u wordt verzonden om de login goed te keuren (het logt direct in zodra de juiste sleutel is ingevoerd).</p>
+  <p><strong>Goedkeuring vereist vóór toegang:</strong> Wanneer een ander apparaat de juiste toegangssleutel invoert, wordt er een melding naar u verzonden om toestemming te vragen voor de toegang van het andere apparaat nadat de juiste sleutel is ingevoerd (u kunt weigeren).</p>
+  <p><strong>Toegang tot account blokkeren:</strong> Zelfs als de inloggegevens correct worden ingevoerd, wordt er nooit toegang tot het account verleend.</p>
+</div>
+
+<!-- Polski -->
+<div class="lang-section lang-pl">
+  <div class="lang-title">Polski (Polish)</div>
+  <p><strong>Natychmiastowy dostęp po wpisaniu poprawnego klucza dostępu:</strong> Gdy inne urządzenie wpisze poprawny klucz dostępu do konta, loguje się ono do konta natychmiast, bez wysyłania do Ciebie wiadomości z prośbą o zatwierdzenie logowania z innego urządzenia (zalogowanie następuje od razu po wpisaniu poprawnego klucza).</p>
+  <p><strong>Żądanie zgody przed dostępem:</strong> Gdy inne urządzenie wpisze poprawny klucz dostępu do konta, otrzymasz wiadomość z prośbą o zatwierdzenie dostępu dla tego urządzenia po wpisaniu poprawnego klucza (możesz odmówić).</p>
+  <p><strong>Zablokowanie dostępu do konta:</strong> Nawet jeśli dane konta zostaną wpisane poprawnie, dostęp do konta nigdy nie zostanie przyznany.</p>
+</div>
+
+<!-- Português -->
+<div class="lang-section lang-pt">
+  <div class="lang-title">Português (Portuguese)</div>
+  <p><strong>Acesso imediato após inserir a chave correta:</strong> É quando outro dispositivo insere a chave de acesso correta da conta وentra na conta imediatamente, sem que nenhuma mensagem de verificação seja enviada para você aprovar o login de outro dispositivo (entra na conta assim que a chave correta é inserida).</p>
+  <p><strong>Pedir aprovação antes de entrar:</strong> É quando outro dispositivo insere a chave de acesso correta da conta e uma mensagem será enviada para você pedir sua aprovação para permitir que o outro dispositivo acesse a conta após inserir a chave correta (você pode recusar).</p>
+  <p><strong>Bloquear acesso à conta:</strong> Mesmo que as credenciais da conta sejam digitadas corretamente, o acesso à conta nunca será permitido.</p>
+</div>
+
+<!-- Svenska -->
+<div class="lang-section lang-sv">
+  <div class="lang-title">Svenska (Swedish)</div>
+  <p><strong>Omedelbar åtkomst vid korrekt nyckel:</strong> När en annan enhet anger rätt kontonyckel loggar den in på kontot omedelbart utan att skicka ett meddelande till dig för att godkänna inloggningen från en annan enhet (den loggar in direkt när rätt nyckel anges).</p>
+  <p><strong>Begär godkännande innan åtkomst:</strong> När en annan enhet anger rätt kontonyckel skickas ett meddelande till dig som ber om ditt godkännande för att låta den andra enheten komma åt kontot efter att den rätta nyckeln har angivits (du kan neka).</p>
+  <p><strong>Blockera kontoåtkomst:</strong> Även om kontouppgifterna skrivs in korrekt kommer kontot aldrig att beviljas åtkomst.</p>
+</div>
+
+<!-- Ελληνικά -->
+<div class="lang-section lang-el">
+  <div class="lang-title">Ελληνικά (Greek)</div>
+  <p><strong>Άμεση πρόσβαση με σωστό κλειδί πρόσβασης:</strong> Όταν μια άλλη συσκευή εισάγει το σωστό κλειδί πρόσβασης του λογαριασμού, συνδέεται αμέσως χωρίς να σας αποσταλεί μήνυμα επιβεβαίωσης για έγκριση της σύνδεσης από άλλη συσκευή (συνδέεται απευθείας με την εισαγωγή του σωστού κλειδιού).</p>
+  <p><strong>Αίτησή έγκρισης πριν την πρόσβαση:</strong> Όταν μια άλλη συσκευή εισάγει το σωστό κλειδί πρόσβασης, θα σας αποσταλεί μήνυμα που θα ζητά την έγκρισή σας για να επιτραπεί η πρόσβαση της άλλης συσκευής στον λογαριασμό μετά την εισαγωγή του σωστού κλειδιού (μπορείτε να απορρίψετε).</p>
+  <p><strong>Φραγή πρόσβασης στον λογαριασμό:</strong> Ακόμη και αν τα στοιχεία του λογαριασμού εισαχθούν σωστά, η πρόσβαση στον λογαριασμό δεν θα επιτραπεί ποτέ.</p>
+</div>
+
+</body>
+</html>

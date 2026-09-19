@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>الشريط الجانبي</title>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        body {
+            background-color: #ffb700;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        .sidebar { 
+            position: fixed; 
+            right: 0; 
+            top: 0; 
+            height: 100%; 
+            width: 80px; 
+            background: rgb(255, 255, 255); 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            padding-top: 30px; 
+            z-index: 2000;
+            box-shadow: -2px 0 10px rgba(0,0,0,0.3);
+        }
+        
+        .sidebar a { 
+            margin-bottom: 35px; 
+            color: rgb(255, 149, 0); 
+            font-size: 26px; 
+            text-decoration: none; 
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .sidebar a:hover { 
+            transform: scale(1.2); 
+            color: #ff9900; 
+        }
+
+        .profile-icon {
+            color: rgb(255, 166, 0) !important;
+            background-color: white;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar">
+        <a href="index.html"><i class="fas fa-home"></i></a>
+        <a href="profile.html">
+            <i class="fas fa-user-circle profile-icon"></i>
+        </a>
+        <a href="bell.html"><i class="fas fa-bell"></i></a>
+        <a href="create.html">
+            <div class="create-icon-container">
+                <i class="fas fa-external-link-alt"></i>
+            </div>
+        </a>
+    </div>
+
+    <div class="right-sidebar" style="display: flex; flex-direction: column; align-items: flex-start; gap: 20px; max-width: 400px; margin-right: 140px; margin-top: 140px; direction: rtl; font-family: sans-serif;">
+        
+        <div class="search-container" style="position: relative; width: 100%;">
+            <i class="fas fa-search search-icon" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); color: #888;"></i>
+            <input type="text" placeholder="Search anything" class="search-input" style="width: 100%; padding: 10px 40px 10px 15px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; box-sizing: border-box;">
+        </div>
+
+        <!-- زر انشئ فيديو -->
+        <div class="create-wrapper" style="width: 100%;">
+            <div id="actionBtn" class="main-btn" onclick="showWarningModal()" style="cursor: pointer; display: flex; align-items: center; gap: 15px; margin-bottom: 15px; transition: 0.3s;">
+                <div class="geo-camera" style="width: 40px; height: 25px; background: black; border-radius: 4px; position: relative;">
+                    <div style="width: 12px; height: 12px; border: 2px solid white; border-radius: 50%; position: absolute; top: 4px; left: 12px;"></div>
+                </div>
+                <span style="font-size: 20px; font-weight: bold;">انشئ فيديو</span>
+            </div>
+        </div>
+
+        <hr style="border: 0.5px solid #eee; margin: 20px 0; width: 100%;">
+
+        <!-- زر منشور -->
+        <div class="main-btn" onclick="showWarningModal()" style="cursor: pointer; display: flex; align-items: center; gap: 15px; margin-bottom: 15px;">
+            <div style="width: 35px; height: 35px; background: orange; clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);"></div>
+            <span style="font-size: 20px; font-weight: bold;">منشور</span>
+        </div>
+
+        <!-- زر نشر فيديو قصير -->
+        <div class="main-btn" onclick="showWarningModal()" style="cursor: pointer; display: flex; align-items: center; gap: 15px;">
+            <svg width="26" height="38" viewBox="0 0 24 36" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-right: 5px;">
+                <rect width="24" height="36" fill="#2c3e50"/>
+                <path d="M10 14.5V21.5L15.5 18L10 14.5Z" fill="white"/>
+            </svg>
+            <span style="font-size: 20px; font-weight: bold;">نشر فيديو قصير</span>
+        </div>
+        
+    </div>
+
+    <!-- زر نشر فيديو استوديو -->
+    <div style="text-align: right; margin-top: 2cm; margin-right: 3.7cm;">
+        <button onclick="showWarningModal()" style="display: inline-flex; align-items: center; gap: 12px; background: transparent; border: none; padding: 0; cursor: pointer;">
+            <div style="position: relative; width: 32px; height: 32px; background-color: #e8f5e9; border-radius: 8px; display: flex; justify-content: center; align-items: center;">
+                <svg viewBox="0 0 24 24" width="20" height="20">
+                    <path d="M14 6l-3.75 5 2.85 3.8-1.6 1.2C10.5 15 9 13 9 13L3 21h18L14 6z" fill="#4CAF50"/>
+                    <path d="M16 6l2.29 2.29-4.88 4.88-3-3L2 17.59 3.41 19l8-8 3 3L20.59 9 22 10.41V6h-6z" fill="#4CAF50"/>
+                </svg>
+            </div>
+            <span style="font-size: 16px; font-weight: bold; color: #333333;">نشر فيديو استوديو</span>
+        </button>
+    </div>
+
+    <!-- نافذة التحذير (Modal) المشتركة -->
+    <div id="warningModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); justify-content:center; align-items:center; z-index:1000;">
+        <div style="background:#fff; padding:20px; border-radius:10px; text-align:center; position:relative; min-width: 250px;">
+            <button onclick="closeWarningModal()" style="position:absolute; top:10px; left:10px; background:transparent; border:none; font-size:18px; font-weight:bold; color:#000; cursor:pointer;">&times;</button>
+            <p style="margin-top: 20px;">يجب هنالك حساب</p>
+            <button onclick="window.location.href='aaaa.html'" style="background:#4CAF50; color:#fff; border:none; padding:8px 16px; border-radius:5px; cursor:pointer; margin-top: 10px;">موافق</button>
+        </div>
+    </div>
+
+    <script>
+        // دالة إظهار نافذة التحذير عند الضغط على أي زر نشر
+        function showWarningModal() {
+            document.getElementById('warningModal').style.display = 'flex';
+        }
+
+        // دالة إغلاق النافذة عبر علامة ×
+        function closeWarningModal() {
+            document.getElementById('warningModal').style.display = 'none';
+        }
+    </script>
+</body>
+</html>
