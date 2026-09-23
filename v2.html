@@ -2,528 +2,383 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Watch - Orange Design</title>
-    <link rel="icon" href="data:,">
+    <title>منصة Zozen - مشغل الفيديو السحابي</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <style>
-        :root { 
-            --bg-color: #F4EAE1; 
-        }
-        * {
-            box-sizing: border-box;
-        }
-        body { 
-            margin: 0; 
-            padding: 0; 
-            background-color: var(--bg-color) !important; 
-            font-family: 'Segoe UI', sans-serif; 
-            direction: rtl; 
-            overflow-x: hidden;
-        }
-
-        /* الشريط الجانبي للشاشات الكبيرة (يمين) */
-        .sidebar { 
-            position: fixed; 
-            right: 0; 
-            top: 0; 
-            height: 100%; 
-            width: 80px; 
-            background: rgb(255, 255, 255); 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            padding-top: 30px; 
-            z-index: 2000;
-            box-shadow: -2px 0 10px rgba(0,0,0,0.1);
-        }
+    
+    <!-- ربط مكتبة Firebase السحابية بالإعدادات الخاصة بك -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, doc, getDoc, updateDoc, increment, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
         
-        .sidebar a { 
-            margin-bottom: 35px; 
-            color: rgb(255, 136, 0); 
-            font-size: 26px; 
-            text-decoration: none; 
-            transition: 0.3s; 
-        }
-        .sidebar a:hover { 
-            transform: scale(1.2); 
-            color: #ffe0b2; 
-        }
+        const firebaseConfig = {
+            apiKey: "AIzaSyBagL51Peeaa-sW0ppnYd_d-IF6Zj0IgsE",
+            authDomain: "hssuhc784.firebaseapp.com",
+            projectId: "hssuhc784",
+            storageBucket: "hssuhc784.firebasestorage.app",
+            messagingSenderId: "1072093295082",
+            appId: "1:1072093295082:web:c490462c9a8e3f46860293",
+            measurementId: "G-65VEXWQZWV"
+        };
 
-        .header-top {
-            position: fixed; 
-            top: 0; 
-            left: 0; 
-            right: 80px; 
-            height: 80px;
-            background: white; 
-            display: flex; 
-            align-items: center; 
-            justify-content: space-between;
-            padding: 0 30px; 
-            z-index: 500; 
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-        }
-
-        .logo-text {
-            color: orange;
-            font-weight: bold;
-            font-size: 18px;
-        }
-
-        .main-content {
-            margin-right: 80px; 
-            padding: 100px 20px 40px 20px;
-            max-width: 900px; 
-            margin-left: auto; 
-            margin-right: auto;
-        }
-
-        .video-container {
-            background: transparent;
-            width: 100%;
-        }
-
-        .native-video-player {
-            width: 100%;
-            height: auto;
-            aspect-ratio: 16 / 9;
-            border-radius: 12px;
-            background: #000;
-            outline: none;
-            display: block;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-        }
-
-        .video-error-box {
-            display: none; 
-            background: #fff3cd; 
-            color: #856404; 
-            padding: 15px;
-            border: 1px solid #ffeeba; 
-            text-align: center; 
-            margin-bottom: 15px;
-            border-radius: 8px;
-        }
-        .video-error-box a { 
-            color: #856404; 
-            font-weight: bold; 
-            text-decoration: underline; 
-        }
-
-        .video-details {
-            margin-top: 15px;
-            display: flex; 
-            justify-content: space-between;
-            align-items: center; 
-            padding: 20px; 
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.04);
-            gap: 15px;
-        }
-
-        .video-info-text {
-            flex: 1;
-            min-width: 0;
-        }
-
-        .video-title { 
-            font-size: 18px; 
-            font-weight: bold; 
-            color: #333; 
-            word-break: break-word; 
-        }
-        .video-author { 
-            color: orange; 
-            font-size: 14px; 
-            margin-top: 5px; 
-        }
-
-        .action-buttons { 
-            display: flex; 
-            gap: 15px; 
-            align-items: center; 
-            flex-shrink: 0;
-        }
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
         
-        .like-btn {
-            background: white; 
-            border: 2px solid orange; 
-            color: orange;
-            padding: 8px 18px; 
-            border-radius: 20px; 
-            cursor: pointer; 
-            font-size: 15px;
-            display: flex; 
-            align-items: center; 
-            gap: 8px; 
-            transition: 0.3s; 
-            font-weight: bold;
-        }
-        .like-btn.liked { 
-            background: orange; 
-            color: white; 
-        }
-        .like-btn.liked i { 
-            color: white; 
-        }
-        .like-btn:disabled { 
-            opacity: 0.6; 
-            cursor: not-allowed; 
-        }
-
-        .comments-section { 
-            margin-top: 15px; 
-            padding: 20px;
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.04);
-        }
-        .comments-section h3 { 
-            color: #333; 
-            margin-bottom: 15px; 
-            font-size: 17px; 
-        }
-        .comment-form { 
-            display: flex; 
-            gap: 10px; 
-            margin-bottom: 20px; 
-            align-items: center;
-        }
-        .comment-input { 
-            flex: 1; 
-            padding: 10px 15px; 
-            border: 2px solid #ddd; 
-            border-radius: 25px; 
-            outline: none; 
-            font-size: 14px; 
-            transition: border-color 0.3s;
-            min-width: 0;
-        }
-        .comment-input:focus { 
-            border-color: orange; 
-        }
-        .comment-submit-btn { 
-            background: orange; 
-            color: white; 
-            border: none; 
-            padding: 10px 20px; 
-            border-radius: 25px; 
-            cursor: pointer; 
-            font-weight: bold; 
-            transition: 0.3s;
-            flex-shrink: 0;
-        }
-        .comment-submit-btn:disabled { 
-            background: #ccc; 
-            cursor: not-allowed; 
-        }
-
-        .comments-list { 
-            display: flex; 
-            flex-direction: column; 
-            gap: 12px; 
-        }
-        .comment-card { 
-            background: #faf4f0; 
-            padding: 12px 15px; 
-            border-radius: 10px; 
-            word-break: break-word; 
-        }
-        .comment-author { 
-            font-weight: bold; 
-            color: orange; 
-            font-size: 13px; 
-            margin-bottom: 4px; 
-        }
-        .comment-text { 
-            color: #444; 
-            font-size: 14px; 
-            white-space: pre-wrap; 
-        }
-
-        /* تخصيص الهواتف المحمولة (الشاشات أقل من 768 بكسل) */
-        @media (max-width: 768px) {
-            .sidebar {
-                top: auto;
-                bottom: 0;
-                right: 0;
-                width: 100%;
-                height: 60px;
-                flex-direction: row;
-                justify-content: space-around;
-                padding-top: 0;
-                box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
-            }
-            .sidebar a {
-                margin-bottom: 0;
-                font-size: 20px;
-            }
-            .header-top {
-                right: 0;
-                padding: 0 15px;
-                height: 60px;
-            }
-            .main-content {
-                margin-right: 0;
-                padding: 75px 10px 90px 10px; /* مساحة مناسبة بالأسفل لكي لا يغطي الشريط المحتوى */
-                max-width: 100%;
-            }
-            .native-video-player {
-                border-radius: 0;
-            }
-            .video-details, .comments-section {
-                border-radius: 10px;
-                margin-left: 0;
-                margin-right: 0;
-            }
-        }
-    </style>
-    <script>
-        (function () {
-            if (!localStorage.getItem('user_email')) {
-                window.location.replace('aaaa.html');
-            }
-            const savedColor = localStorage.getItem('themeBgColor');
-            if (savedColor) {
-                document.documentElement.style.setProperty('--bg-color', savedColor);
-            }
-        })();
+        window.db = db;
+        window.firebaseTools = { doc, getDoc, updateDoc, increment, setDoc };
+        window.dispatchEvent(new Event('firebase-loaded'));
     </script>
+
+    <style>
+        body { margin: 0; padding: 0; background-color: #F4EAE1; font-family: 'Segoe UI', sans-serif; overflow-x: hidden; }
+        .sidebar { position: fixed; right: 0; top: 0; height: 100%; width: 80px; background: white; display: flex; flex-direction: column; align-items: center; padding-top: 30px; z-index: 2000; box-shadow: -2px 0 10px rgba(0,0,0,0.1); }
+        .sidebar a { margin-bottom: 35px; color: rgb(255, 136, 0); font-size: 26px; text-decoration: none; transition: 0.3s; }
+        .sidebar a:hover { transform: scale(1.2); color: #ffe0b2; }
+        .header-top { position: fixed; top: 0; left: 0; right: 80px; height: 80px; background: white; display: flex; align-items: center; justify-content: space-between; padding: 0 30px; z-index: 1000; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        .player-container { display: flex; gap: 25px; padding: 110px 40px 40px 110px; margin-right: 80px; direction: rtl; }
+        .suggestions-sidebar { width: 350px; flex-shrink: 0; display: flex; flex-direction: column; gap: 15px; }
+        .suggestion-title { font-size: 18px; font-weight: bold; color: #333; margin-bottom: 5px; border-bottom: 2px solid orange; padding-bottom: 5px; display: flex; justify-content: space-between; align-items: center; }
+        .suggested-card { background: white; border-radius: 10px; overflow: hidden; display: flex; gap: 10px; padding: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); cursor: pointer; transition: 0.3s; border-right: 3px solid transparent; }
+        .suggested-card:hover { transform: scale(1.02); border-right: 3px solid orange; }
+        .suggested-thumb { width: 120px; aspect-ratio: 16/9; background: #000; object-fit: cover; border-radius: 5px; }
+        .suggested-info { display: flex; flex-direction: column; justify-content: center; flex-grow: 1; overflow: hidden; }
+        .suggested-video-title { font-weight: bold; font-size: 14px; color: #333; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .suggested-meta { font-size: 12px; color: orange; margin-top: 5px; }
+        .main-player-area { flex-grow: 1; display: flex; flex-direction: column; gap: 20px; }
+        .video-box { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); }
+        .main-video { width: 100%; aspect-ratio: 16/9; background: #000; border-radius: 10px; object-fit: contain; }
+        .video-details { margin-top: 20px; display: flex; flex-direction: column; gap: 10px; }
+        .details-header { display: flex; justify-content: space-between; align-items: flex-start; }
+        .title-and-views { display: flex; flex-direction: column; gap: 5px; }
+        .video-title { font-size: 22px; font-weight: bold; color: #333; }
+        .views-count-text { font-size: 14px; color: #000000; font-weight: 600; }
+        .like-btn { cursor: pointer; font-size: 22px; color: #ccc; transition: 0.2s; display: flex; align-items: center; gap: 8px; font-weight: bold; user-select: none; }
+        .like-btn.liked { color: orange; }
+        .like-btn:hover { transform: scale(1.1); }
+        .account-info { display: flex; align-items: center; gap: 15px; padding-top: 15px; border-top: 1px solid #eee; margin-top: 5px; }
+        .account-link { display: flex; align-items: center; gap: 15px; text-decoration: none; cursor: pointer; }
+        .account-img { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 2px solid orange; background: #ccc; }
+        .account-text { display: flex; flex-direction: column; }
+        .user-name { font-weight: bold; color: orange; font-size: 16px; }
+        .account-name { color: #777; font-size: 13px; margin-top: 2px; }
+        .comments-section { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); }
+        .comments-title { font-size: 18px; font-weight: bold; margin-bottom: 15px; color: #333; }
+        .comment-input-box { display: flex; gap: 15px; margin-bottom: 25px; align-items: center; }
+        .comment-input { flex-grow: 1; padding: 12px 20px; border: 2px solid #eee; border-radius: 25px; font-family: inherit; font-size: 14px; outline: none; transition: 0.3s; }
+        .comment-input:focus { border-color: orange; }
+        .comment-submit-btn { background: orange; color: white; border: none; padding: 12px 25px; border-radius: 25px; cursor: pointer; font-weight: bold; transition: 0.3s; }
+        .comment-submit-btn:hover { background: rgb(255, 115, 0); }
+        .comments-list { display: flex; flex-direction: column; gap: 15px; max-height: 400px; overflow-y: auto; padding-left: 5px; }
+        .comment-card { background: #fafafa; border-right: 4px solid orange; padding: 15px; border-radius: 8px; display: flex; gap: 12px; align-items: flex-start; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
+        .comment-user-img { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; cursor: pointer; border: 1px solid orange; }
+        .comment-content { display: flex; flex-direction: column; gap: 5px; flex-grow: 1; }
+        .comment-user-meta { font-size: 13px; font-weight: bold; color: orange; cursor: pointer; }
+        .comment-user-meta span { color: #999; font-size: 11px; font-weight: normal; margin-right: 5px; }
+        .comment-text-body { font-size: 14px; color: #444; line-height: 1.4; }
+    </style>
 </head>
 <body>
 
     <div class="sidebar">
         <a href="inndex.html"><i class="fas fa-house"></i></a>
-        <a href="profile2.html"><i class="fas fa-circle-user"></i></a>
-        <a href="bell2.html"><i class="fas fa-bell"></i></a>
-        <a href="create2.html"><i class="fas fa-external-link-alt"></i></a>
+        <a href="profile.html"><i class="fas fa-circle-user"></i></a>
+        <a href="bell.html"><i class="fas fa-bell"></i></a>
+        <a href="create.html"><i class="fas fa-external-link-alt"></i></a>
     </div>
 
     <div class="header-top">
-        <div class="logo-text">Orange Design</div>
-        <div></div>
+        <img src="file:///C:/Users/USER/Desktop/مجلد جديد/.png-image_16162666.png" style="width: 40px; height: 40px; object-fit: contain;" alt="Logo">
     </div>
 
-    <div class="main-content" id="mainContainer">
-        <p style="text-align: center; color: #333;">جاري تحميل الفيديو...</p>
-    </div>
+    <div class="player-container">
+        
+        <div class="suggestions-sidebar">
+            <div class="suggestion-title">
+                <span>مقترحات Zozen الذكية</span>
+                <i class="fas fa-robot" style="font-size: 14px; color: orange;"></i>
+            </div>
+            <div id="suggestionsGrid">جاري جلب المقترحات...</div>
+        </div>
 
-    <script>
-        const SUPABASE_URL = "https://lzvtnfdgynwczrkwlwhf.supabase.co";
-        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx6dnRuZmRneW53Y3pya3dsd2hmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkxNDIxMTEsImV4cCI6MjEwNDcxODExMX0.w2hNlJ4SszyMBkUVjr1qiWNTTPxHMHkM9YOFtVP-pVI";
-        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-        let currentVideoId = null;
-        let isLiked = false;
-        let isProcessingLike = false;
-
-        function formatVideoId(id) {
-            return (!isNaN(Number(id)) && id !== null && id !== '') ? Number(id) : id;
-        }
-
-        function escapeHtml(text) {
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
-        }
-
-        window.addEventListener("DOMContentLoaded", async () => {
-            const selectedVideoStr = localStorage.getItem('selectedVideo');
-            if (!selectedVideoStr) {
-                document.getElementById('mainContainer').innerHTML = "<p style='text-align: center; color: #333;'>لم يتم اختيار أي فيديو.</p>";
-                return;
-            }
-
-            try {
-                let videoData = JSON.parse(selectedVideoStr);
-                currentVideoId = formatVideoId(videoData.id);
-
-                if (currentVideoId) {
-                    const { data: cloudVideo } = await supabaseClient
-                        .from('videos')
-                        .select('*')
-                        .eq('id', currentVideoId)
-                        .maybeSingle();
-
-                    if (cloudVideo) {
-                        videoData = { ...videoData, ...cloudVideo };
-                    }
-                }
+        <div class="main-player-area">
+            
+            <div class="video-box">
+                <video id="mainVideoPlayer" class="main-video" controls autoplay src="" ontimeupdate="checkViewTime()"></video>
                 
-                renderVideoPage(videoData);
-                await loadCloudData(currentVideoId);
-            } catch (e) {
-                console.error(e);
-                document.getElementById('mainContainer').innerHTML = "<p style='text-align: center; color: #333;'>حدث خطأ أثناء تحميل بيانات الفيديو.</p>";
-            }
-        });
-
-        function renderVideoPage(video) {
-            const container = document.getElementById('mainContainer');
-            const videoSource = video.url || video.video_url || '';
-            const videoAuthor = video.author || video.username || "مستخدم";
-
-            if (!videoSource || videoSource.startsWith('blob:')) {
-                container.innerHTML = `
-                    <div class="video-container" style="text-align: center; padding: 40px;">
-                        <h3 style="color: #d9534f; margin-bottom: 10px;">رابط الفيديو غير صالح أو قديم</h3>
-                        <p style="color: #666; font-size: 14px;">يرجى رفع فيديو جديد عبر صفحة الرفع للحصول على رابط سحابي دائم.</p>
-                        <br>
-                        <a href="inndex.html" style="color: orange; font-weight: bold; text-decoration: none;">← العودة للرئيسية</a>
-                    </div>
-                `;
-                return;
-            }
-
-            container.innerHTML = `
-                <div class="video-container">
-                    <div id="videoErrorBox" class="video-error-box">
-                        تعذر تشغيل الفيديو داخل المتصفح. 
-                        <br>
-                        <a href="${videoSource}" target="_blank" download>اضغط هنا لتنزيله وتشغيله ببرنامج خارجي</a>
+                <div class="video-details">
+                    <div class="details-header">
+                        <div class="title-and-views">
+                            <div id="mainVideoTitle" class="video-title">تحميل العنوان...</div>
+                            <div class="views-count-text">الـمشاهدات: <span id="mainVideoViews">0</span></div>
+                        </div>
+                        <div id="likeButton" class="like-btn" onclick="toggleLike()">
+                            <i class="fas fa-heart"></i>
+                            <span id="likeCount">0</span>
+                        </div>
                     </div>
                     
-                    <video id="myVideoPlayer" class="native-video-player" controls preload="auto" crossorigin="anonymous">
-                        <source src="${videoSource}">
-                        متصفحك لا يدعم تشغيل هذا الفيديو.
-                    </video>
-
-                    <div class="video-details">
-                        <div class="video-info-text">
-                            <div class="video-title">${escapeHtml(video.title || "بدون عنوان")}</div>
-                            <div class="video-author"><i class="fas fa-user"></i> ${escapeHtml(videoAuthor)}</div>
-                        </div>
-                        <div class="action-buttons">
-                            <button class="like-btn" id="likeBtn" onclick="handleLike()">
-                                <i class="fas fa-heart"></i> <span id="likesCount">${video.likes || 0}</span>
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="comments-section">
-                        <h3 id="commentsHeader">التعليقات (0)</h3>
-                        <form class="comment-form" onsubmit="submitComment(event)">
-                            <input type="text" id="commentInput" class="comment-input" placeholder="اكتب تعليقاً..." required>
-                            <button type="submit" id="commentSubmitBtn" class="comment-submit-btn">إرسال</button>
-                        </form>
-                        <div class="comments-list" id="commentsList">
-                            <p style="color: #666; font-size: 14px;">جاري تحميل التعليقات...</p>
+                    <div class="account-info">
+                        <div id="accountLinkContainer" class="account-link">
+                            <img id="mainAccountImg" class="account-img" src="" alt="صورة الحساب">
+                            <div class="account-text">
+                                <span id="mainUserName" class="user-name">اسم المستخدم</span>
+                                <span id="mainAccountName" class="account-name">اسم الحساب</span>
+                            </div>
                         </div>
                     </div>
                 </div>
-            `;
+            </div>
 
-            const playerEl = document.getElementById('myVideoPlayer');
-            if (playerEl) {
-                playerEl.onerror = function() {
-                    const errBox = document.getElementById('videoErrorBox');
-                    if (errBox) errBox.style.display = 'block';
-                };
-            }
-        }
+            <div class="comments-section">
+                <div class="comments-title">التعليقات (<span id="commentsCount">0</span>)</div>
+                
+                <div class="comment-input-box">
+                    <input type="text" id="newCommentInput" class="comment-input" placeholder="اكتب تعليقاً علنياً...">
+                    <button class="comment-submit-btn" onclick="addNewComment()">تعليق</button>
+                </div>
 
-        async function loadCloudData(videoId) {
-            if (!videoId) return;
-            const userEmail = localStorage.getItem('user_email');
+                <div id="commentsList" class="comments-list"></div>
+            </div>
 
-            const likesCountEl = document.getElementById('likesCount');
-            const likeBtnEl = document.getElementById('likeBtn');
+        </div>
 
-            const { data: videoData } = await supabaseClient.from('videos').select('likes').eq('id', videoId).maybeSingle();
-            if (videoData && likesCountEl) {
-                likesCountEl.innerText = videoData.likes || 0;
-            }
+    </div>
 
-            if (userEmail && likeBtnEl) {
-                const { data: likeData } = await supabaseClient.from('video_likes').select('*').eq('video_id', videoId).eq('user_email', userEmail).maybeSingle();
-                isLiked = !!likeData;
-                if (isLiked) {
-                    likeBtnEl.classList.add('liked');
+    <script>
+    let currentVideo = null;
+    let viewCountedForCurrentSession = false;
+
+    window.addEventListener('firebase-loaded', () => {
+        initPlayer();
+    });
+
+    async function initPlayer() {
+        let selectedVideoFromStorage = JSON.parse(localStorage.getItem('selectedVideo'));
+        
+        if (selectedVideoFromStorage && selectedVideoFromStorage.url) {
+            currentVideo = selectedVideoFromStorage;
+            
+            try {
+                const videoDocId = btoa(currentVideo.url).replace(/[^a-zA-Z0-9]/g, '');
+                const docRef = window.firebaseTools.doc(window.db, "videos", videoDocId);
+                const docSnap = await window.firebaseTools.getDoc(docRef);
+                
+                if (docSnap.exists()) {
+                    currentVideo.views = docSnap.data().views || 0;
                 } else {
-                    likeBtnEl.classList.remove('liked');
+                    await window.firebaseTools.setDoc(docRef, {
+                        url: currentVideo.url,
+                        title: currentVideo.title || '',
+                        views: parseInt(currentVideo.views) || 0
+                    });
                 }
+            } catch (e) {
+                console.error("خطأ في الاتصال بالسحابة لجلب المشاهدات:", e);
+            }
+        }
+
+        viewCountedForCurrentSession = false;
+        
+        if (currentVideo) {
+            renderMainVideo(currentVideo);
+        } else {
+            document.getElementById('mainVideoTitle').innerText = "لم يتم اختيار فيديو لتشغيله.";
+        }
+
+        loadRecommendations();
+    }
+
+    function goToProfile(accountName, userName) {
+        window.location.href = `jndfsl.html?account=${encodeURIComponent(accountName)}&username=${encodeURIComponent(userName)}`;
+    }
+
+    function renderMainVideo(video) {
+        const player = document.getElementById('mainVideoPlayer');
+        player.src = video.url;
+        player.play();
+
+        document.getElementById('mainVideoTitle').innerText = video.title || 'بدون عنوان';
+        document.getElementById('mainVideoViews').innerText = video.views || 0;
+        document.getElementById('mainUserName').innerText = video.userName || 'مستخدم';
+        document.getElementById('mainAccountName').innerText = video.accountName || '';
+        
+        const accountImgUrl = video.accountImg || 'https://via.placeholder.com/50/orange/white?text=User';
+        document.getElementById('mainAccountImg').src = accountImgUrl;
+
+        document.getElementById('accountLinkContainer').onclick = function() {
+            goToProfile(video.accountName || '', video.userName || 'مستخدم');
+        };
+
+        const likeBtn = document.getElementById('likeButton');
+        const currentUserData = JSON.parse(localStorage.getItem('currentUser')) || {};
+        const currentViewer = currentUserData.userName || 'مستخدم'; 
+        
+        const videoLikesKey = `likes_${btoa(video.url)}`;
+        let likedUsers = JSON.parse(localStorage.getItem(videoLikesKey)) || [];
+
+        if (likedUsers.includes(currentViewer)) {
+            likeBtn.classList.add('liked');
+        } else {
+            likeBtn.classList.remove('liked');
+        }
+
+        document.getElementById('likeCount').innerText = video.likes || 0;
+        loadComments(video.url);
+    }
+
+    async function checkViewTime() {
+        const player = document.getElementById('mainVideoPlayer');
+        if (!currentVideo || viewCountedForCurrentSession) return;
+
+        const deviceViewKey = `cloud_viewed_${btoa(currentVideo.url)}`;
+        const hasDeviceViewedBefore = localStorage.getItem(deviceViewKey);
+
+        if (player.currentTime >= 4 && !hasDeviceViewedBefore) {
+            viewCountedForCurrentSession = true;
+            localStorage.setItem(deviceViewKey, 'true');
+
+            currentVideo.views = (parseInt(currentVideo.views) || 0) + 1;
+            document.getElementById('mainVideoViews').innerText = currentVideo.views;
+
+            try {
+                const videoDocId = btoa(currentVideo.url).replace(/[^a-zA-Z0-9]/g, '');
+                const docRef = window.firebaseTools.doc(window.db, "videos", videoDocId);
+                
+                await window.firebaseTools.updateDoc(docRef, {
+                    views: window.firebaseTools.increment(1)
+                });
+            } catch (e) {
+                console.error("فشل التحديث السحابي للمشاهدة:", e);
             }
 
-            const { data: comments } = await supabaseClient.from('comments').select('*').eq('video_id', videoId).order('created_at', { ascending: false });
-            const commentsListEl = document.getElementById('commentsList');
-            const commentsHeaderEl = document.getElementById('commentsHeader');
+            localStorage.setItem('selectedVideo', JSON.stringify(currentVideo));
+            let allVideos = JSON.parse(localStorage.getItem('app_videos')) || [];
+            allVideos = allVideos.map(v => v.url === currentVideo.url ? { ...v, views: currentVideo.views } : v);
+            localStorage.setItem('app_videos', JSON.stringify(allVideos));
+        }
+    }
 
-            if (!commentsListEl || !commentsHeaderEl) return;
+    function toggleLike() {
+        if (!currentVideo) return;
 
-            const count = comments ? comments.length : 0;
-            commentsHeaderEl.innerText = `التعليقات (${count})`;
+        const likeBtn = document.getElementById('likeButton');
+        const likeCountSpan = document.getElementById('likeCount');
+        let currentLikes = parseInt(likeCountSpan.innerText);
+        
+        const currentUserData = JSON.parse(localStorage.getItem('currentUser')) || {};
+        const currentViewer = currentUserData.userName || 'مستخدم';
+        
+        const videoLikesKey = `likes_${btoa(currentVideo.url)}`;
+        let likedUsers = JSON.parse(localStorage.getItem(videoLikesKey)) || [];
 
-            if (count === 0) {
-                commentsListEl.innerHTML = "<p style='color: #666; font-size: 14px;'>لا توجد تعليقات بعد. كن أول من يعلق!</p>";
-                return;
+        if (likeBtn.classList.contains('liked')) {
+            likeBtn.classList.remove('liked');
+            currentLikes = Math.max(0, currentLikes - 1);
+            likedUsers = likedUsers.filter(user => user !== currentViewer);
+        } else {
+            likeBtn.classList.add('liked');
+            currentLikes++;
+            if (!likedUsers.includes(currentViewer)) {
+                likedUsers.push(currentViewer);
             }
+        }
+        
+        likeCountSpan.innerText = currentLikes;
+        localStorage.setItem(videoLikesKey, JSON.stringify(likedUsers));
 
-            let commentsHtml = '';
-            comments.forEach(c => {
-                commentsHtml += `
-                    <div class="comment-card">
-                        <div class="comment-author"><i class="fas fa-user-circle"></i> ${escapeHtml(c.user_email || "مستخدم")}</div>
-                        <div class="comment-text">${escapeHtml(c.comment_text || '')}</div>
+        currentVideo.likes = currentLikes;
+        localStorage.setItem('selectedVideo', JSON.stringify(currentVideo));
+        
+        let allVideos = JSON.parse(localStorage.getItem('app_videos')) || [];
+        allVideos = allVideos.map(v => v.url === currentVideo.url ? { ...v, likes: currentLikes } : v);
+        localStorage.setItem('app_videos', JSON.stringify(allVideos));
+    }
+
+    function loadRecommendations() {
+        const suggestionsGrid = document.getElementById('suggestionsGrid');
+        const allVideos = JSON.parse(localStorage.getItem('app_videos')) || [];
+        const otherVideos = allVideos.filter(v => v.url !== (currentVideo ? currentVideo.url : ''));
+
+        if (otherVideos.length === 0) {
+            suggestionsGrid.innerHTML = "<p style='color: #999; font-size: 14px;'>لا توجد مقترحات أخرى حالياً.</p>";
+            return;
+        }
+
+        suggestionsGrid.innerHTML = otherVideos.map((v) => {
+            return `
+                <div class="suggested-card" onclick='playSuggestedVideo(${JSON.stringify(v).replace(/'/g, "&#39;")})'>
+                    <video class="suggested-thumb" src="${v.url}"></video>
+                    <div class="suggested-info">
+                        <span class="suggested-video-title">${v.title || 'بدون عنوان'}</span>
+                        <span class="suggested-meta">
+                            <i class="fas fa-user" style="font-size: 10px;"></i> ${v.userName || 'مستخدم'} | المشاهدات: ${v.views || 0}
+                        </span>
                     </div>
-                `;
-            });
-            commentsListEl.innerHTML = commentsHtml;
+                </div>
+            `;
+        }).join('');
+    }
+
+    function playSuggestedVideo(videoObject) {
+        currentVideo = videoObject;
+        viewCountedForCurrentSession = false;
+        localStorage.setItem('selectedVideo', JSON.stringify(videoObject));
+        renderMainVideo(videoObject);
+        loadRecommendations();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function loadComments(videoUrl) {
+        const allComments = JSON.parse(localStorage.getItem('app_comments')) || {};
+        const videoComments = allComments[videoUrl] || [];
+        
+        document.getElementById('commentsCount').innerText = videoComments.length;
+        const commentsList = document.getElementById('commentsList');
+
+        if (videoComments.length === 0) {
+            commentsList.innerHTML = "<p style='color: #999; font-size: 14px;'>لا توجد تعليقات بعد. كن أول من يعلق!</p>";
+            return;
         }
 
-        async function handleLike() {
-            if (!currentVideoId || isProcessingLike) return;
-            isProcessingLike = true;
-            const userEmail = localStorage.getItem('user_email');
-            const likeBtnEl = document.getElementById('likeBtn');
-            const likesEl = document.getElementById('likesCount');
-            if (!likeBtnEl || !likesEl) return;
+        commentsList.innerHTML = videoComments.slice().reverse().map(c => `
+            <div class="comment-card">
+                <img class="comment-user-img" src="${c.userImg}" alt="avatar" onclick="goToProfile('${c.accountName}', '${c.userName}')">
+                <div class="comment-content">
+                    <div class="comment-user-meta" onclick="goToProfile('${c.accountName}', '${c.userName}')">
+                        ${c.userName} <span style="color:#777;">(${c.accountName})</span> <span>منذ قليل</span>
+                    </div>
+                    <div class="comment-text-body">${c.text}</div>
+                </div>
+            </div>
+        `).join('');
+    }
 
-            let currentLikes = parseInt(likesEl.innerText) || 0;
-            likeBtnEl.disabled = true;
+    function addNewComment() {
+        const input = document.getElementById('newCommentInput');
+        const commentText = input.value.trim();
+        
+        if (!commentText || !currentVideo) return;
 
-            if (!isLiked) {
-                isLiked = true; 
-                currentLikes += 1;
-                likeBtnEl.classList.add('liked');
-                await supabaseClient.from('video_likes').insert([{ video_id: currentVideoId, user_email: userEmail }]);
-            } else {
-                isLiked = false; 
-                currentLikes = Math.max(0, currentLikes - 1);
-                likeBtnEl.classList.remove('liked');
-                await supabaseClient.from('video_likes').delete().eq('video_id', currentVideoId).eq('user_email', userEmail);
-            }
+        const currentUserData = JSON.parse(localStorage.getItem('currentUser')) || {};
 
-            likesEl.innerText = currentLikes;
-            await supabaseClient.from('videos').update({ likes: currentLikes }).eq('id', currentVideoId);
-            likeBtnEl.disabled = false;
-            isProcessingLike = false;
+        const newComment = {
+            text: commentText,
+            userName: currentUserData.userName || "مستخدم مسجل",
+            accountName: currentUserData.accountName || "@user",
+            userImg: currentUserData.userImg || "https://via.placeholder.com/50/orange/white?text=Me",
+            timestamp: new Date().getTime()
+        };
+
+        const allComments = JSON.parse(localStorage.getItem('app_comments')) || {};
+        if (!allComments[currentVideo.url]) {
+            allComments[currentVideo.url] = [];
         }
+        
+        allComments[currentVideo.url].push(newComment);
+        localStorage.setItem('app_comments', JSON.stringify(allComments));
 
-        async function submitComment(event) {
-            event.preventDefault();
-            const inputEl = document.getElementById('commentInput');
-            const submitBtn = document.getElementById('commentSubmitBtn');
-            if (!inputEl || !submitBtn) return;
-
-            const commentText = inputEl.value.trim();
-            if (!commentText || !currentVideoId) return;
-
-            submitBtn.disabled.false; // تم التصحيح
-            submitBtn.disabled = true;
-            const userEmail = localStorage.getItem('user_email') || "مستخدم";
-            const { error } = await supabaseClient.from('comments').insert([{ video_id: currentVideoId, user_email: userEmail, comment_text: commentText }]);
-
-            if (error) {
-                alert("خطأ في إرسال التعليق: " + error.message);
-            } else {
-                inputEl.value = '';
-                await loadCloudData(currentVideoId);
-            }
-            submitBtn.disabled = false;
-        }
-    </script>
+        input.value = '';
+        loadComments(currentVideo.url);
+    }
+</script>
 </body>
 </html>

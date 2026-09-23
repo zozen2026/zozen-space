@@ -13,10 +13,8 @@
             margin: 0;
             padding: 0;
             font-family: Arial, sans-serif;
-            padding-bottom: 100px; /* مسافة إضافية من الأسفل حتى لا يغطي الشريط المحتوى في الموبايل */
         }
 
-        /* الشريط الجانبي الافتراضي (للكمبيوتر والشاشات الكبيرة) */
         .sidebar { 
             position: fixed; 
             right: 0; 
@@ -30,7 +28,6 @@
             padding-top: 30px; 
             z-index: 2000;
             box-shadow: -2px 0 10px rgba(0,0,0,0.3);
-            transition: 0.3s ease;
         }
         
         .sidebar a { 
@@ -56,44 +53,39 @@
             justify-content: center;
         }
 
-        /* المحتوى الرئيسي والأزرار */
         .right-sidebar {
             display: flex;
             flex-direction: column;
             align-items: flex-start;
             gap: 20px;
             max-width: 400px;
-            width: 90%;
             margin-right: 140px;
             margin-top: 140px;
             direction: rtl;
             font-family: sans-serif;
-            transition: 0.3s ease;
         }
 
         .search-container { position: relative; width: 100%; }
         .search-icon { position: absolute; right: 15px; top: 50%; transform: translateY(-50%); color: #888; }
-        .search-input { width: 100%; padding: 12px 40px 12px 15px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; background: #fff; }
+        .search-input { width: 100%; padding: 10px 40px 10px 15px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; }
 
-        .main-btn { cursor: pointer; display: flex; align-items: center; gap: 15px; margin-bottom: 5px; transition: 0.3s; width: 100%; background: #fff; padding: 12px 15px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-        .main-btn span { font-size: 18px; font-weight: bold; color: #333; }
-        .main-btn:hover { background: #fff8e1; }
+        .main-btn { cursor: pointer; display: flex; align-items: center; gap: 15px; margin-bottom: 15px; transition: 0.3s; }
+        .main-btn span { font-size: 20px; font-weight: bold; }
 
-        .geo-camera { width: 40px; height: 25px; background: black; border-radius: 4px; position: relative; flex-shrink: 0; }
+        .geo-camera { width: 40px; height: 25px; background: black; border-radius: 4px; position: relative; }
         .geo-camera-lens { width: 12px; height: 12px; border: 2px solid white; border-radius: 50%; position: absolute; top: 4px; left: 12px; }
 
-        .divider { border: 0.5px solid rgba(0,0,0,0.1); margin: 10px 0; width: 100%; }
+        .divider { border: 0.5px solid #eee; margin: 20px 0; width: 100%; }
 
-        .post-icon-shape { width: 35px; height: 35px; background: orange; clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%); flex-shrink: 0; }
+        .post-icon-shape { width: 35px; height: 35px; background: orange; clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%); }
 
-        .publish-studio-container { text-align: right; margin-top: 30px; margin-right: 140px; position: relative; z-index: 500; transition: 0.3s ease; }
-        .publish-studio-btn { display: inline-flex; align-items: center; gap: 12px; background: #fff; border: none; padding: 12px 20px; border-radius: 10px; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.05); width: 100%; max-width: 400px; justify-content: flex-start; }
-        .publish-studio-icon-wrapper { position: relative; width: 32px; height: 32px; background-color: #e8f5e9; border-radius: 8px; display: flex; justify-content: center; align-items: center; flex-shrink: 0; }
+        .publish-studio-container { text-align: right; margin-top: 2cm; margin-right: 3.7cm; position: relative; z-index: 500; }
+        .publish-studio-btn { display: inline-flex; align-items: center; gap: 12px; background: transparent; border: none; padding: 10px; cursor: pointer; }
+        .publish-studio-icon-wrapper { position: relative; width: 32px; height: 32px; background-color: #e8f5e9; border-radius: 8px; display: flex; justify-content: center; align-items: center; }
         .publish-studio-text { font-size: 16px; font-weight: bold; color: #333333; }
 
-        /* النوافذ المنبثقة (Modal) */
-        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 3000; direction: rtl; padding: 15px; }
-        .modal-content { background: #fff; padding: 25px; border-radius: 12px; text-align: center; position: relative; width: 420px; max-width: 100%; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 3000; direction: rtl; }
+        .modal-content { background: #fff; padding: 25px; border-radius: 12px; text-align: center; position: relative; width: 420px; max-width: 90%; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
         .modal-close-btn { position: absolute; top: 10px; left: 10px; background: transparent; border: none; font-size: 20px; font-weight: bold; color: #666; cursor: pointer; }
         .modal-text { margin-top: 15px; font-size: 16px; font-weight: bold; color: #333; }
 
@@ -102,7 +94,7 @@
         .btn-no { background: #f44336; color: #fff; border: none; padding: 8px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; }
 
         .studio-container { display: none; margin-top: 15px; }
-        .file-select-btn { background: #e8f5e9; color: #2e7d32; border: 2px dashed #4CAF50; padding: 12px; width: 100%; border-radius: 8px; cursor: pointer; font-weight: bold; margin-bottom: 10px; }
+        .file-select-btn { background: #e8f5e9; color: #2e7d32; border: 2px dashed #4CAF50; padding: 10px; width: 100%; border-radius: 8px; cursor: pointer; font-weight: bold; margin-bottom: 10px; }
         .videos-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; max-height: 200px; overflow-y: auto; background: #f9f9f9; padding: 8px; border-radius: 8px; border: 1px solid #ddd; margin-bottom: 10px; }
         .video-thumb-card { background: #fff; border: 2px solid #ddd; border-radius: 6px; cursor: pointer; overflow: hidden; display: flex; flex-direction: column; align-items: center; padding: 5px; transition: 0.2s; }
         .video-thumb-card.selected { border-color: #4CAF50; background-color: #e8f5e9; }
@@ -121,53 +113,10 @@
         .progress-bar-container { display: none; width: 100%; background-color: #eee; border-radius: 8px; overflow: hidden; margin-bottom: 12px; height: 20px; position: relative; }
         .progress-bar-fill { height: 100%; background-color: #4CAF50; width: 0%; transition: width 0.2s; }
         .progress-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 11px; font-weight: bold; color: #333; }
-
-        /* التجاوب مع شاشات الموبايل (Media Query) */
-        @media screen and (max-width: 768px) {
-            /* تحويل الشريط الجانبي إلى شريط سفلي (Bottom Navbar) */
-            .sidebar {
-                top: auto;
-                bottom: 0;
-                right: 0;
-                width: 100%;
-                height: 65px;
-                flex-direction: row;
-                justify-content: space-around;
-                padding-top: 0;
-                box-shadow: 0 -2px 10px rgba(0,0,0,0.15);
-            }
-
-            .sidebar a {
-                margin-bottom: 0;
-                font-size: 22px;
-            }
-
-            /* إعادة ضبط هوامش المحتوى ليتوسط الشاشة بالكامل في الجوال */
-            .right-sidebar {
-                margin-right: auto;
-                margin-left: auto;
-                margin-top: 30px;
-                width: 92%;
-                max-width: 100%;
-            }
-
-            .publish-studio-container {
-                margin-right: auto;
-                margin-left: auto;
-                text-align: center;
-                width: 92%;
-                margin-top: 20px;
-            }
-
-            .publish-studio-btn {
-                max-width: 100%;
-            }
-        }
     </style>
 </head>
 <body>
 
-    <!-- الشريط الجانبي (يتحول تلقائياً إلى شريط سفلي في الهواتف) -->
     <div class="sidebar">
         <a href="inndex.html"><i class="fas fa-home"></i></a>
         <a href="profile2.html"><i class="fas fa-user-circle profile-icon"></i></a>
@@ -175,7 +124,6 @@
         <a href="create2.html"><div class="create-icon-container"><i class="fas fa-external-link-alt"></i></div></a>
     </div>
 
-    <!-- المحتوى الرئيسي والأزرار -->
     <div class="right-sidebar">
         <div class="search-container">
             <i class="fas fa-search search-icon"></i>
@@ -195,7 +143,7 @@
         </div>
 
         <div class="main-btn" onclick="window.location.href='PPPP.html'">
-            <svg width="26" height="38" viewBox="0 0 24 36" fill="none" style="margin-left: 5px;">
+            <svg width="26" height="38" viewBox="0 0 24 36" fill="none" style="margin-right: 5px;">
                 <rect width="24" height="36" fill="#2c3e50"/>
                 <path d="M10 14.5V21.5L15.5 18L10 14.5Z" fill="white"/>
             </svg>
@@ -203,7 +151,6 @@
         </div>
     </div>
 
-    <!-- زر نشر فيديو استوديو -->
     <div class="publish-studio-container">
         <button type="button" onclick="showWarningModal()" class="publish-studio-btn">
             <div class="publish-studio-icon-wrapper">
@@ -216,7 +163,6 @@
         </button>
     </div>
 
-    <!-- النافذة المنبثقة (Modal) -->
     <div id="warningModal" class="modal-overlay">
         <div class="modal-content">
             <button onclick="closeWarningModal()" class="modal-close-btn">&times;</button>
@@ -251,7 +197,6 @@
         </div>
     </div>
 
-    <!-- السكريبت والوظائف -->
     <script>
         const SUPABASE_URL = "https://lzvtnfdgynwczrkwlwhf.supabase.co";
         const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx6dnRuZmRneW53Y3pya3dsd2hmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkxNDIxMTEsImV4cCI6MjEwNDcxODExMX0.w2hNlJ4SszyMBkUVjr1qiWNTTPxHMHkM9YOFtVP-pVI";
@@ -448,7 +393,7 @@
                 progressText.innerText = 'تم النشر بنجاح!';
 
                 setTimeout(() => {
-                    window.location.href = 'index.html';
+                    window.location.href = 'inndex.html';
                 }, 600);
 
             } catch (err) {

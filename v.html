@@ -36,9 +36,14 @@
         .main-video { width: 100%; aspect-ratio: 16/9; background: #000; border-radius: 10px; object-fit: contain; }
         
         /* تفاصيل الفيديو والتفاعل */
-        .video-details { margin-top: 20px; display: flex; flex-direction: column; gap: 15px; }
-        .details-header { display: flex; justify-content: space-between; align-items: center; }
+        .video-details { margin-top: 20px; display: flex; flex-direction: column; gap: 10px; }
+        .details-header { display: flex; justify-content: space-between; align-items: flex-start; }
+        
+        .title-and-views { display: flex; flex-direction: column; gap: 5px; }
         .video-title { font-size: 22px; font-weight: bold; color: #333; }
+        
+        /* عدد المشاهدات باللون الأسود وتحت العنوان مباشرة */
+        .views-count-text { font-size: 14px; color: #000000; font-weight: 600; }
         
         /* زر الإعجاب (القلب) */
         .like-btn { cursor: pointer; font-size: 22px; color: #ccc; transition: 0.2s; display: flex; align-items: center; gap: 8px; font-weight: bold; user-select: none; }
@@ -46,25 +51,21 @@
         .like-btn:hover { transform: scale(1.1); }
 
         /* منطقة بيانات الحساب */
-        .account-info { display: flex; align-items: center; gap: 15px; padding-top: 15px; border-top: 1px solid #eee; }
+        .account-info { display: flex; align-items: center; gap: 15px; padding-top: 15px; border-top: 1px solid #eee; margin-top: 5px; }
         .account-link { display: flex; align-items: center; gap: 15px; text-decoration: none; cursor: pointer; }
         .account-img { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 2px solid orange; background: #ccc; }
         .account-text { display: flex; flex-direction: column; }
         .user-name { font-weight: bold; color: orange; font-size: 16px; }
         .account-name { color: #777; font-size: 13px; margin-top: 2px; }
 
-        /* قسم التعليقات الجديد */
+        /* قسم التعليقات */
         .comments-section { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); }
         .comments-title { font-size: 18px; font-weight: bold; margin-bottom: 15px; color: #333; }
-        
-        /* صندوق إدخال تعليق */
         .comment-input-box { display: flex; gap: 15px; margin-bottom: 25px; align-items: center; }
         .comment-input { flex-grow: 1; padding: 12px 20px; border: 2px solid #eee; border-radius: 25px; font-family: inherit; font-size: 14px; outline: none; transition: 0.3s; }
         .comment-input:focus { border-color: orange; }
         .comment-submit-btn { background: orange; color: white; border: none; padding: 12px 25px; border-radius: 25px; cursor: pointer; font-weight: bold; transition: 0.3s; }
         .comment-submit-btn:hover { background: rgb(255, 115, 0); }
-
-        /* قائمة التعليقات (تعليق فوق تعليق) */
         .comments-list { display: flex; flex-direction: column; gap: 15px; max-height: 400px; overflow-y: auto; padding-left: 5px; }
         .comment-card { background: #fafafa; border-right: 4px solid orange; padding: 15px; border-radius: 8px; display: flex; gap: 12px; align-items: flex-start; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
         .comment-user-img { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; cursor: pointer; border: 1px solid orange; }
@@ -106,11 +107,16 @@
         <div class="main-player-area">
             
             <div class="video-box">
-                <video id="mainVideoPlayer" class="main-video" controls autoplay src=""></video>
+                <!-- تم إضافة كود تتبع 4 ثوانٍ للمشاهدة -->
+                <video id="mainVideoPlayer" class="main-video" controls autoplay src="" ontimeupdate="checkViewTime()"></video>
                 
                 <div class="video-details">
                     <div class="details-header">
-                        <div id="mainVideoTitle" class="video-title">تحميل العنوان...</div>
+                        <div class="title-and-views">
+                            <div id="mainVideoTitle" class="video-title">تحميل العنوان...</div>
+                            <!-- عدد المشاهدات باللون الأسود وتحت العنوان مباشرة -->
+                            <div class="views-count-text">الـمشاهدات: <span id="mainVideoViews">0</span></div>
+                        </div>
                         <div id="likeButton" class="like-btn" onclick="toggleLike()">
                             <i class="fas fa-heart"></i>
                             <span id="likeCount">0</span>
@@ -155,37 +161,33 @@
 
     <script>
     let currentVideo = null;
+    let viewCountedForCurrentSession = false; // لمنع احتساب أكثر من مشاهدة لنفس الجلسة/الفيديو
 
-    // دالة التحقق مما إذا كان المستخدم مسجل الدخول
     function isUserLoggedIn() {
         const currentUser = JSON.parse(localStorage.getItem('currentUser'));
-        // يمكنك تعديل الشرط بناءً على هيكل بيانات المستخدم لديك (مثلاً التأكد من وجود اسم مستخدم أو رمز)
         return currentUser && currentUser.userName && currentUser.userName !== "مستخدم حالي";
     }
 
-    // إظهار النافذة المنبثقة بالرسالة المطلوبة
     function showAuthModal(message) {
         document.getElementById('authModalMessage').innerText = message;
         document.getElementById('authModal').style.display = 'flex';
     }
 
-    // إغلاق النافذة المنبثقة
     function closeAuthModal() {
         document.getElementById('authModal').style.display = 'none';
     }
 
-    // منع الكتابة/التركيز على شريط التعليقات إذا لم يكن مسجلاً
     function checkAuthForComment(event) {
         if (!isUserLoggedIn()) {
             event.preventDefault();
-            document.getElementById('newCommentInput').blur(); // إبعاد التركيز عن حقل الإدخال
+            document.getElementById('newCommentInput').blur();
             showAuthModal('يجب ان تنشئ حساب لكي تتمكن تكتب تعليقات.');
         }
     }
 
-    // دالة تشغيل الصفحة وجلب البيانات
     function initPlayer() {
         currentVideo = JSON.parse(localStorage.getItem('selectedVideo'));
+        viewCountedForCurrentSession = false; // إعادة تعيين عند تحميل فيديو جديد
         
         if (currentVideo) {
             renderMainVideo(currentVideo);
@@ -196,18 +198,17 @@
         renderSuggestions();
     }
 
-    // دالة لتوجيه المستخدم لصفحة الحساب مع البيانات بالرابط
     function goToProfile(accountName, userName) {
         window.location.href = `jndfsl.html?account=${encodeURIComponent(accountName)}&username=${encodeURIComponent(userName)}`;
     }
 
-    // دالة لعرض وتحديث الفيديو الرئيسي في المشغل والبيانات والتفاعل
     function renderMainVideo(video) {
         const player = document.getElementById('mainVideoPlayer');
         player.src = video.url;
         player.play();
 
         document.getElementById('mainVideoTitle').innerText = video.title || 'بدون عنوان';
+        document.getElementById('mainVideoViews').innerText = video.views || 0;
         document.getElementById('mainUserName').innerText = video.userName || 'مستخدم';
         document.getElementById('mainAccountName').innerText = video.accountName || '';
         
@@ -235,7 +236,34 @@
         loadComments(video.url);
     }
 
-    // دالة لتغيير حالة الإعجاب (القلب) مع التحقق من الحساب
+    // دالة فحص تخطي 4 ثوانٍ واحتساب المشاهدة (مع منع التكرار من نفس الشبكة/المتصفح)
+    function checkViewTime() {
+        const player = document.getElementById('mainVideoPlayer');
+        if (!currentVideo || viewCountedForCurrentSession) return;
+
+        // مفتاح أمان محلي خاص بهذا الفيديو لمنع تكرار المشاهدة الوهمية من نفس المتصفح
+        const viewedStorageKey = `viewed_session_${btoa(currentVideo.url)}`;
+        const hasViewedBefore = sessionStorage.getItem(viewedStorageKey);
+
+        // إذا تجاوز الفيديو 4 ثوانٍ ولم يتم احتسابها في هذه الجلسة أو المتصفح
+        if (player.currentTime >= 4 && !hasViewedBefore) {
+            viewCountedForCurrentSession = true;
+            sessionStorage.setItem(viewedStorageKey, 'true');
+
+            // تحديث عدد المشاهدات محلياً وفقط في التخزين العام للمنصة
+            currentVideo.views = (parseInt(currentVideo.views) || 0) + 1;
+            document.getElementById('mainVideoViews').innerText = currentVideo.views;
+
+            // تحديث التخزين المؤقت للفيديو المختار
+            localStorage.setItem('selectedVideo', JSON.stringify(currentVideo));
+
+            // تحديث قاعدة بيانات الفيديوهات العامة لترى كل الأجهزة والناس التحديث
+            let allVideos = JSON.parse(localStorage.getItem('app_videos')) || [];
+            allVideos = allVideos.map(v => v.url === currentVideo.url ? { ...v, views: currentVideo.views } : v);
+            localStorage.setItem('app_videos', JSON.stringify(allVideos));
+        }
+    }
+
     function toggleLike() {
         if (!isUserLoggedIn()) {
             showAuthModal('يجب ان تنشئ حساب لكي تتمكن من الإعجاب.');
@@ -277,7 +305,6 @@
         localStorage.setItem('app_videos', JSON.stringify(updatedVideos));
     }
 
-    // دالة لعرض الفيديوهات المقترحة في القائمة اليمنى
     function renderSuggestions() {
         const suggestionsGrid = document.getElementById('suggestionsGrid');
         const allVideos = JSON.parse(localStorage.getItem('app_videos')) || [];
@@ -290,9 +317,8 @@
         }
 
         suggestionsGrid.innerHTML = suggestedVideos.map((v) => {
-            const videoDataStr = JSON.stringify(v).replace(/"/g, '&quot;');
             return `
-                <div class="suggested-card" onclick="playSuggestedVideo(${videoDataStr})">
+                <div class="suggested-card" onclick='playSuggestedVideo(${JSON.stringify(v).replace(/'/g, "&#39;")})'>
                     <video class="suggested-thumb" src="${v.url}"></video>
                     <div class="suggested-info">
                         <span class="suggested-video-title">${v.title || 'بدون عنوان'}</span>
@@ -307,13 +333,13 @@
 
     function playSuggestedVideo(videoObject) {
         currentVideo = videoObject;
+        viewCountedForCurrentSession = false;
         localStorage.setItem('selectedVideo', JSON.stringify(videoObject));
         renderMainVideo(videoObject);
         renderSuggestions();
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    // نظام التعليقات
     function loadComments(videoUrl) {
         const allComments = JSON.parse(localStorage.getItem('app_comments')) || {};
         const videoComments = allComments[videoUrl] || [];
