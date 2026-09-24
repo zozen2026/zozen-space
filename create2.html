@@ -9,9 +9,10 @@
     <!-- Supabase SDK -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
-    <!-- Firebase SDKs (خوادم جوجل الخارجية للتخزين) -->
+    <!-- Firebase SDKs (خوادم جوجل الخارجية للتخزين والتحليلات) -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-storage-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-analytics-compat.js"></script>
 
     <style>
         * { box-sizing: border-box; }
@@ -210,18 +211,21 @@
         const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx6dnRuZmRneW53Y3pya3dsd2hmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkxNDIxMTEsImV4cCI6MjEwNDcxODExMX0.w2hNlJ4SszyMBkUVjr1qiWNTTPxHMHkM9YOFtVP-pVI";
         const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        // 2. إعدادات Firebase (خوادم جوجل للتخزين)
-        // قم بستبدال هذه البيانات بالقيم الخاصة بمشروعك من Firebase Console
+        // 2. إعدادات Firebase (تم تضمين بيانات المشروع الخاصة بك)
         const firebaseConfig = {
-            apiKey: "YOUR_FIREBASE_API_KEY",
-            authDomain: "YOUR_PROJECT.firebaseapp.com",
-            projectId: "YOUR_PROJECT_ID",
-            storageBucket: "YOUR_PROJECT.appspot.com",
-            messagingSenderId: "YOUR_SENDER_ID",
-            appId: "YOUR_APP_ID"
+            apiKey: "AIzaSyBagL51Peeaa-sW0ppnYd_d-IF6Zj0IgsE",
+            authDomain: "hssuhc784.firebaseapp.com",
+            projectId: "hssuhc784",
+            storageBucket: "hssuhc784.firebasestorage.app",
+            messagingSenderId: "1072093295082",
+            appId: "1:1072093295082:web:c490462c9a8e3f46860293",
+            measurementId: "G-65VEXWQZWV"
         };
         firebase.initializeApp(firebaseConfig);
         const googleStorage = firebase.storage();
+        if (firebase.analytics) {
+            firebase.analytics();
+        }
 
         let selectedVideoFile = null;
 
