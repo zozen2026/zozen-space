@@ -61,11 +61,13 @@
         .account-name { color: #777; font-size: 13px; margin-top: 2px; }
         .comments-section { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); }
         .comments-title { font-size: 18px; font-weight: bold; margin-bottom: 15px; color: #333; }
-        .comment-input-box { display: flex; gap: 15px; margin-bottom: 25px; align-items: center; }
+        .comment-input-box { display: flex; flex-direction: column; gap: 8px; margin-bottom: 25px; }
+        .input-row { display: flex; gap: 15px; align-items: center; }
         .comment-input { flex-grow: 1; padding: 12px 20px; border: 2px solid #eee; border-radius: 25px; font-family: inherit; font-size: 14px; outline: none; transition: 0.3s; }
         .comment-input:focus { border-color: orange; }
         .comment-submit-btn { background: orange; color: white; border: none; padding: 12px 25px; border-radius: 25px; cursor: pointer; font-weight: bold; transition: 0.3s; }
         .comment-submit-btn:hover { background: rgb(255, 115, 0); }
+        .comment-error-msg { color: #d32f2f; font-size: 13px; font-weight: bold; display: none; padding-right: 15px; }
         .comments-list { display: flex; flex-direction: column; gap: 15px; max-height: 400px; overflow-y: auto; padding-left: 5px; }
         .comment-card { background: #fafafa; border-right: 4px solid orange; padding: 15px; border-radius: 8px; display: flex; gap: 12px; align-items: flex-start; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
         .comment-user-img { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; cursor: pointer; border: 1px solid orange; }
@@ -131,8 +133,11 @@
                 <div class="comments-title">التعليقات (<span id="commentsCount">0</span>)</div>
                 
                 <div class="comment-input-box">
-                    <input type="text" id="newCommentInput" class="comment-input" placeholder="اكتب تعليقاً علنياً...">
-                    <button class="comment-submit-btn" onclick="addNewComment()">تعليق</button>
+                    <div class="input-row">
+                        <input type="text" id="newCommentInput" class="comment-input" placeholder="اكتب تعليقاً علنياً...">
+                        <button class="comment-submit-btn" onclick="addNewComment()">تعليق</button>
+                    </div>
+                    <div id="commentErrorMsg" class="comment-error-msg"></div>
                 </div>
 
                 <div id="commentsList" class="comments-list"></div>
@@ -143,6 +148,42 @@
     </div>
 
     <script>
+    // ----------------------------------------------------
+    // نظام الفلترة الموسع للكلمات النابية وغير الأخلاقية
+    // ----------------------------------------------------
+    const FORBIDDEN_WORDS = [
+        // المستوى 1: السباب الخفيف والمتوسط
+        "غبي", "احمق", "أحمق", "حمار", "كلب", "حيوان", "فاشل", "تافه", "حقير", 
+        "وقح", "سافل", "منحط", "قذر", "زبالة", "خنزير", "لعنة", "اللعنة", "يا جحش",
+        
+        // المستوى 2: الألفاظ الخرساء والسباب الشديد
+        "خرا", "خراء", "خرية", "زق", "طيز", "زب", "شرموط", "شرموطة", "قحبة", 
+        "عرص", "ديوث", "كس", "منيوك", "كحبة", "مكسكس", "طيزك", "كسك", "زبك",
+        
+        // المستوى 3: الكفر والإساءة الدينية
+        "يلعن رب", "يلعن دين", "سب الرب", "سب الدين", "كفر", "يلعن الله", "كافر"
+    ];
+
+    function checkBadWords(text) {
+        if (!text) return false;
+        
+        // إزالة الحركات، التشكيل، والمسافات المكررة لضمان الدقة
+        let cleanText = text.toLowerCase()
+            .replace(/[\u064B-\u065F]/g, "") // إزالة التشكيل
+            .replace(/[^\w\sأ-ي]/g, " ")      // إزالة الرموز والترقيم
+            .replace(/\s+/g, " ");
+
+        for (let word of FORBIDDEN_WORDS) {
+            let normalizedWord = word.toLowerCase().replace(/[\u064B-\u065F]/g, "");
+            let regex = new RegExp(`(?:^|\\s)${normalizedWord}(?:$|\\s)`, 'i');
+            
+            if (regex.test(cleanText) || cleanText.includes(normalizedWord)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     let currentVideo = null;
     let viewCountedForCurrentSession = false;
 
@@ -353,9 +394,19 @@
 
     function addNewComment() {
         const input = document.getElementById('newCommentInput');
+        const errorMsg = document.getElementById('commentErrorMsg');
         const commentText = input.value.trim();
         
+        errorMsg.style.display = 'none';
+        
         if (!commentText || !currentVideo) return;
+
+        // تطبيق الفلترة الذكية للكلمات غير الأخلاقية
+        if (checkBadWords(commentText)) {
+            errorMsg.innerText = "عذراً، يحتوي التعليق على كلمات غير لائقة أو ألفاظ محظورة.";
+            errorMsg.style.display = 'block';
+            return;
+        }
 
         const currentUserData = JSON.parse(localStorage.getItem('currentUser')) || {};
 
