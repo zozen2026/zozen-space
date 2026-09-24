@@ -5,7 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>إنشاء - Orange Design</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Supabase SDK -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <!-- Firebase SDKs (خوادم جوجل الخارجية للتخزين) -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-storage-compat.js"></script>
+
     <style>
         * { box-sizing: border-box; }
         body {
@@ -198,9 +205,23 @@
     </div>
 
     <script>
+        // 1. إعدادات Supabase
         const SUPABASE_URL = "https://lzvtnfdgynwczrkwlwhf.supabase.co";
         const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx6dnRuZmRneW53Y3pya3dsd2hmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkxNDIxMTEsImV4cCI6MjEwNDcxODExMX0.w2hNlJ4SszyMBkUVjr1qiWNTTPxHMHkM9YOFtVP-pVI";
         const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        // 2. إعدادات Firebase (خوادم جوجل للتخزين)
+        // قم بستبدال هذه البيانات بالقيم الخاصة بمشروعك من Firebase Console
+        const firebaseConfig = {
+            apiKey: "YOUR_FIREBASE_API_KEY",
+            authDomain: "YOUR_PROJECT.firebaseapp.com",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_PROJECT.appspot.com",
+            messagingSenderId: "YOUR_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const googleStorage = firebase.storage();
 
         let selectedVideoFile = null;
 
@@ -310,91 +331,82 @@
             progressContainer.style.display = 'block';
 
             try {
-                progressFill.style.width = '25%';
-                progressText.innerText = '25%';
+                // اسم ملف فريد للرفع إلى خوادم جوجل
+                const cleanFileName = `videos/${Date.now()}_${selectedVideoFile.name}`;
+                const storageRef = googleStorage.ref(cleanFileName);
+                const uploadTask = storageRef.put(selectedVideoFile);
 
-                const fileExt = selectedVideoFile.name.split('.').pop() || 'mp4';
-                const cleanFileName = `${Date.now()}.${fileExt}`;
+                // متابعة نسبة الرفع الحقيقية إلى خوادم جوجل
+                uploadTask.on('state_changed', 
+                    (snapshot) => {
+                        const progress = Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100);
+                        progressFill.style.width = `${progress}%`;
+                        progressText.innerText = `جاري الرفع لجوجل: ${progress}%`;
+                    }, 
+                    (error) => {
+                        console.error("Google Storage Error:", error);
+                        alert("فشل رفع الفيديو إلى خوادم جوجل: " + error.message);
+                        publishBtn.disabled = false;
+                        publishBtn.style.background = '#4CAF50';
+                        progressContainer.style.display = 'none';
+                    }, 
+                    async () => {
+                        // 1. استخراج الرابط المباشر من جوجل
+                        const googleVideoUrl = await uploadTask.snapshot.ref.getDownloadURL();
 
-                progressFill.style.width = '50%';
-                progressText.innerText = '50%';
+                        if (!googleVideoUrl) {
+                            alert("تعذر جلب رابط الفيديو من خوادم جوجل.");
+                            publishBtn.disabled = false;
+                            publishBtn.style.background = '#4CAF50';
+                            progressContainer.style.display = 'none';
+                            return;
+                        }
 
-                const { data: storageData, error: storageError } = await supabaseClient
-                    .storage
-                    .from('videos')
-                    .upload(cleanFileName, selectedVideoFile, {
-                        cacheControl: '3600',
-                        upsert: false
-                    });
+                        const currentUser = localStorage.getItem('user_email') || 'User';
 
-                if (storageError) {
-                    console.error("Storage Error:", storageError);
-                    alert("فشل رفع الفيديو إلى السحابة: " + storageError.message);
-                    publishBtn.disabled = false;
-                    publishBtn.style.background = '#4CAF50';
-                    progressContainer.style.display = 'none';
-                    return;
-                }
+                        const videoData = {
+                            title: title,
+                            url: googleVideoUrl,
+                            video_url: googleVideoUrl,
+                            author: currentUser,
+                            username: currentUser,
+                            created_at: new Date().toISOString()
+                        };
 
-                progressFill.style.width = '75%';
-                progressText.innerText = '75%';
+                        // 2. حفظ الرابط فقط داخل قاعدة بيانات Supabase
+                        const { error: dbError } = await supabaseClient
+                            .from('videos')
+                            .insert([videoData]);
 
-                const { data: urlData } = supabaseClient
-                    .storage
-                    .from('videos')
-                    .getPublicUrl(cleanFileName);
+                        if (dbError) {
+                            alert("خطأ في حفظ البيانات بقاعدة بيانات Supabase: " + dbError.message);
+                            publishBtn.disabled = false;
+                            publishBtn.style.background = '#4CAF50';
+                            progressContainer.style.display = 'none';
+                            return;
+                        }
 
-                const videoPublicUrl = urlData ? urlData.publicUrl : '';
+                        // 3. حفظ البيانات محلياً للمزامنة السريعة
+                        try {
+                            let localVideos = JSON.parse(localStorage.getItem('videos') || '[]');
+                            localVideos.unshift(videoData);
+                            localStorage.setItem('videos', JSON.stringify(localVideos));
 
-                if (!videoPublicUrl) {
-                    alert("تعذر جلب الرابط العام للفيديو.");
-                    publishBtn.disabled = false;
-                    publishBtn.style.background = '#4CAF50';
-                    progressContainer.style.display = 'none';
-                    return;
-                }
+                            let localUploaded = JSON.parse(localStorage.getItem('uploadedVideos') || '[]');
+                            localUploaded.unshift(videoData);
+                            localStorage.setItem('uploadedVideos', JSON.stringify(localUploaded));
+                        } catch (e) {
+                            console.error("LocalStorage Save Error:", e);
+                        }
 
-                const currentUser = localStorage.getItem('user_email') || 'User';
+                        progressFill.style.width = '100%';
+                        progressText.innerText = 'تم النشر بنجاح!';
 
-                const videoData = {
-                    title: title,
-                    url: videoPublicUrl,
-                    video_url: videoPublicUrl,
-                    author: currentUser,
-                    username: currentUser,
-                    created_at: new Date().toISOString()
-                };
-
-                const { error: dbError } = await supabaseClient
-                    .from('videos')
-                    .insert([videoData]);
-
-                if (dbError) {
-                    alert("خطأ في قاعدة البيانات: " + dbError.message);
-                    publishBtn.disabled = false;
-                    publishBtn.style.background = '#4CAF50';
-                    progressContainer.style.display = 'none';
-                    return;
-                }
-
-                try {
-                    let localVideos = JSON.parse(localStorage.getItem('videos') || '[]');
-                    localVideos.unshift(videoData);
-                    localStorage.setItem('videos', JSON.stringify(localVideos));
-
-                    let localUploaded = JSON.parse(localStorage.getItem('uploadedVideos') || '[]');
-                    localUploaded.unshift(videoData);
-                    localStorage.setItem('uploadedVideos', JSON.stringify(localUploaded));
-                } catch (e) {
-                    console.error("LocalStorage Save Error:", e);
-                }
-
-                progressFill.style.width = '100%';
-                progressText.innerText = 'تم النشر بنجاح!';
-
-                setTimeout(() => {
-                    window.location.href = 'inndex.html';
-                }, 600);
+                        setTimeout(() => {
+                            window.location.href = 'inndex.html';
+                        }, 600);
+                    }
+                );
 
             } catch (err) {
                 console.error(err);
