@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl" id="htmlRoot">
+<html lang="en" dir="ltr" id="htmlRoot">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -102,21 +102,25 @@
             appearance: none;
         }
 
-        /* تحكم بأماكن الأيقونات والنصوص بناءً على اتجاه الصفحة */
+        /* ضبط أماكن الأيقونات والنصوص بناءً على الاتجاه */
         [dir="rtl"] .input-wrapper input, [dir="rtl"] .input-wrapper select {
             padding-right: 45px;
+            padding-left: 15px;
             text-align: right;
         }
         [dir="rtl"] .input-wrapper i {
             right: 16px;
+            left: auto;
         }
 
         [dir="ltr"] .input-wrapper input, [dir="ltr"] .input-wrapper select {
             padding-left: 45px;
+            padding-right: 15px;
             text-align: left;
         }
         [dir="ltr"] .input-wrapper i {
             left: 16px;
+            right: auto;
         }
 
         .input-wrapper input:focus, .input-wrapper select:focus {
@@ -175,50 +179,48 @@
             <div class="icon-box">
                 <i class="fas fa-video"></i>
             </div>
-            <h2 id="uiTitle">إنشاء حساب جديد</h2>
-            <p id="uiSubTitle">مكتبة الفيديوهات الخاصة بك</p>
+            <h2 id="uiTitle">Create New Account</h2>
+            <p id="uiSubTitle">Your Personal Video Library</p>
         </div>
 
         <div id="errorMsg" class="error-msg"></div>
         
         <form id="accountForm">
-            <!-- اختيار اللغة -->
+            <!-- اختيار اللغة بالترتيب المطلوبة -->
             <div class="input-group">
-                <label id="lblLanguage">اللغة المفضلة / Language</label>
+                <label id="lblLanguage">Language</label>
                 <div class="input-wrapper">
                     <i class="fas fa-globe"></i>
                     <select id="languageSelect" onchange="changeLanguage(this.value)">
-                        <!-- اللغات الأساسية المطلوبة -->
-                        <option value="en-US">English (United States)</option>
+                        <!-- 1. أمريكا -->
+                        <option value="en-US" selected>English (United States)</option>
+                        <!-- 2. بريطانيا -->
                         <option value="en-GB">English (United Kingdom)</option>
-                        <option value="ar" selected>العربية</option>
+                        <!-- 3. عربي -->
+                        <option value="ar">العربية</option>
+                        <!-- 4. روسي -->
                         <option value="ru">Русский</option>
-                        <option value="it">Italiano</option>
-                        <option value="he">עברית</option>
-                        
-                        <!-- باقي اللغات العالمية -->
+                        <!-- 5. باقي اللغات -->
+                        <option value="hi">हिन्दी</option>
                         <option value="es">Español</option>
                         <option value="fr">Français</option>
                         <option value="de">Deutsch</option>
-                        <option value="pt-BR">Português (Brasil)</option>
+                        <option value="it">Italiano</option>
+                        <option value="pt">Português</option>
                         <option value="tr">Türkçe</option>
                         <option value="fa">فارسی</option>
                         <option value="ur">اردو</option>
-                        <option value="zh">中文 (简体)</option>
+                        <option value="zh">中文</option>
                         <option value="ja">日本語</option>
                         <option value="ko">한국어</option>
                         <option value="uk">Українська</option>
-                        <option value="pl">Polski</option>
-                        <option value="nl">Nederlands</option>
-                        <option value="el">Ελληνικά</option>
-                        <option value="hi">हिन्दी</option>
                     </select>
                 </div>
             </div>
 
             <!-- 1. اسم المستخدم (مع شرط @) -->
             <div class="input-group">
-                <label id="lblUsername">اسم المستخدم</label>
+                <label id="lblUsername">Username</label>
                 <div class="input-wrapper">
                     <i class="fas fa-at"></i>
                     <input type="text" id="username" placeholder="@username" required>
@@ -227,23 +229,23 @@
 
             <!-- 2. اسم الحساب -->
             <div class="input-group">
-                <label id="lblAccountName">اسم الحساب</label>
+                <label id="lblAccountName">Account Name</label>
                 <div class="input-wrapper">
                     <i class="fas fa-user"></i>
-                    <input type="text" id="accountName" placeholder="الاسم الظاهر" required>
+                    <input type="text" id="accountName" placeholder="Display Name" required>
                 </div>
             </div>
             
             <!-- 3. مفتاح الدخول (كلمة السر) -->
             <div class="input-group">
-                <label id="lblPassword">مفتاح الدخول</label>
+                <label id="lblPassword">Password</label>
                 <div class="input-wrapper">
                     <i class="fas fa-lock"></i>
                     <input type="password" id="password" placeholder="••••••••" required>
                 </div>
             </div>
 
-            <button type="submit" class="signup-btn" id="btnSubmit">بدء الاستخدام</button>
+            <button type="submit" class="signup-btn" id="btnSubmit">Get Started</button>
         </form>
     </div>
 
@@ -254,82 +256,136 @@
 
         const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        // قاموس الترجمات للواجهة
+        // قاموس الترجمات الخاص بكل لغة
         const translations = {
-            ar: {
-                title: "إنشاء حساب جديد",
-                subtitle: "مكتبة الفيديوهات الخاصة بك",
-                langLabel: "اللغة المفضلة",
-                userLabel: "اسم المستخدم",
-                accLabel: "اسم الحساب",
-                passLabel: "مفتاح الدخول",
-                btnText: "بدء الاستخدام",
-                placeholderAcc: "الاسم الظاهر",
-                errAt: "يجب أن يبدأ اسم المستخدم بحرف @ إجبارياً"
-            },
             "en-US": {
                 title: "Create New Account",
                 subtitle: "Your Personal Video Library",
-                langLabel: "Preferred Language",
+                langLabel: "Language",
                 userLabel: "Username",
                 accLabel: "Account Name",
                 passLabel: "Password",
                 btnText: "Get Started",
+                placeholderUser: "@username",
                 placeholderAcc: "Display Name",
                 errAt: "Username must start with @ character"
             },
             "en-GB": {
                 title: "Create New Account",
                 subtitle: "Your Personal Video Library",
-                langLabel: "Preferred Language",
+                langLabel: "Language",
                 userLabel: "Username",
                 accLabel: "Account Name",
                 passLabel: "Password",
                 btnText: "Get Started",
+                placeholderUser: "@username",
                 placeholderAcc: "Display Name",
                 errAt: "Username must start with @ character"
+            },
+            ar: {
+                title: "إنشاء حساب جديد",
+                subtitle: "مكتبة الفيديوهات الخاصة بك",
+                langLabel: "اللغة",
+                userLabel: "اسم المستخدم",
+                accLabel: "اسم الحساب",
+                passLabel: "مفتاح الدخول",
+                btnText: "بدء الاستخدام",
+                placeholderUser: "@اسم_المستخدم",
+                placeholderAcc: "الاسم الظاهر",
+                errAt: "يجب أن يبدأ اسم المستخدم بحرف @ إجبارياً"
             },
             ru: {
                 title: "Создать аккаунт",
                 subtitle: "Ваша видеотека",
-                langLabel: "Предпочитаемый язык",
+                langLabel: "Язык",
                 userLabel: "Имя пользователя",
                 accLabel: "Отображаемое имя",
                 passLabel: "Пароль",
                 btnText: "Начать",
+                placeholderUser: "@имя_пользователя",
                 placeholderAcc: "Отображаемое имя",
-                errAt: "Имя пользователя должно начинаться с @"
+                errAt: "Имя пользователя должно начинаться с символа @"
+            },
+            hi: {
+                title: "नया खाता बनाएं",
+                subtitle: "आपकी वीडियो लाइब्रेरी",
+                langLabel: "भाषा",
+                userLabel: "उपयोगकर्ता नाम",
+                accLabel: "खाते का नाम",
+                passLabel: "पासवर्ड",
+                btnText: "शुरू करें",
+                placeholderUser: "@उपयोगकर्ता",
+                placeholderAcc: "प्रदर्शित नाम",
+                errAt: "उपयोगकर्ता नाम @ से शुरू होना अनिवार्य है"
             },
             it: {
                 title: "Crea nuovo account",
                 subtitle: "La tua libreria video",
-                langLabel: "Lingua preferita",
+                langLabel: "Lingua",
                 userLabel: "Nome utente",
                 accLabel: "Nome account",
                 passLabel: "Password",
                 btnText: "Inizia",
+                placeholderUser: "@nome_utente",
                 placeholderAcc: "Nome visualizzato",
                 errAt: "Il nome utente deve iniziare con @"
             },
-            he: {
-                title: "צור חשבון חדש",
-                subtitle: "ספריית הווידאו שלך",
-                langLabel: "שפה מועדפת",
-                userLabel: "שם משתמש",
-                accLabel: "שם החשבון",
-                passLabel: "סיסמה",
-                btnText: "התחל להתמש",
-                placeholderAcc: "שם תצוגה",
-                errAt: "שם המשתמש חייב להתחיל ב-@"
+            es: {
+                title: "Crear nueva cuenta",
+                subtitle: "Tu biblioteca de videos",
+                langLabel: "Idioma",
+                userLabel: "Nombre de usuario",
+                accLabel: "Nombre de la cuenta",
+                passLabel: "Contraseña",
+                btnText: "Comenzar",
+                placeholderUser: "@usuario",
+                placeholderAcc: "Nombre visible",
+                errAt: "El nombre de usuario debe comenzar con @"
+            },
+            fr: {
+                title: "Créer un compte",
+                subtitle: "Votre bibliothèque vidéo",
+                langLabel: "Langue",
+                userLabel: "Nom d'utilisateur",
+                accLabel: "Nom du compte",
+                passLabel: "Mot de passe",
+                btnText: "Commencer",
+                placeholderUser: "@nom_utilisateur",
+                placeholderAcc: "Nom d'affichage",
+                errAt: "Le nom d'utilisateur doit commencer par @"
+            },
+            de: {
+                title: "Neues Konto erstellen",
+                subtitle: "Ihre Videobibliothek",
+                langLabel: "Sprache",
+                userLabel: "Benutzername",
+                accLabel: "Kontiname",
+                passLabel: "Passwort",
+                btnText: "Starten",
+                placeholderUser: "@benutzername",
+                placeholderAcc: "Anzeigename",
+                errAt: "Der Benutzername muss mit @ beginnen"
+            },
+            tr: {
+                title: "Yeni Hesap Oluştur",
+                subtitle: "Video Kütüphaneniz",
+                langLabel: "Dil",
+                userLabel: "Kullanıcı Adı",
+                accLabel: "Hesap Adı",
+                passLabel: "Şifre",
+                btnText: "Başla",
+                placeholderUser: "@kullanici_adi",
+                placeholderAcc: "Görünen Ad",
+                errAt: "Kullanıcı adı @ ile başlamalıdır"
             }
         };
 
-        // دالة تغيير اللغة والاتجاه للصفحة تلقائياً
+        // دالة تغيير اللغة والاتجاه والنصوص بالكامل
         function changeLanguage(langCode) {
             const htmlRoot = document.getElementById('htmlRoot');
-            const rtlLangs = ['ar', 'he', 'fa', 'ur'];
+            const rtlLangs = ['ar', 'fa', 'ur'];
 
-            // ضبط اتجاه النص RTL أو LTR
+            // تغيير الاتجاه (RTL/LTR)
             if (rtlLangs.includes(langCode)) {
                 htmlRoot.setAttribute('dir', 'rtl');
             } else {
@@ -337,7 +393,7 @@
             }
             htmlRoot.setAttribute('lang', langCode);
 
-            // الحصول على الترجمة المناسبة أو استخدام الإنجليزية كافتراضي
+            // جلب الترجمة المطلوبة أو استخدام الإنجليزية كافتراضي
             const t = translations[langCode] || translations['en-US'];
 
             document.getElementById('uiTitle').innerText = t.title;
@@ -347,8 +403,16 @@
             document.getElementById('lblAccountName').innerText = t.accLabel;
             document.getElementById('lblPassword').innerText = t.passLabel;
             document.getElementById('btnSubmit').innerText = t.btnText;
+            
+            // تغيير النصوص التوضيحية داخل المدخلات بلغة الصفحة
+            document.getElementById('username').placeholder = t.placeholderUser;
             document.getElementById('accountName').placeholder = t.placeholderAcc;
         }
+
+        // تشغيل اللغة الافتراضية عند تحميل الصفحة
+        window.addEventListener('DOMContentLoaded', () => {
+            changeLanguage(document.getElementById('languageSelect').value);
+        });
 
         // معالجة نموذج التسجيل
         document.getElementById('accountForm').addEventListener('submit', async (e) => {
@@ -373,7 +437,7 @@
             // توليد رابط الصورة الرمزية التلقائية بناءً على الاسم
             const userAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(accountName)}&background=ff6600&color=fff`;
 
-            // 1. التخزين المحلي الشامل في LocalStorage (كائن موحد + مفاتيح منفصلة)
+            // 1. التخزين المحلي الشامل في LocalStorage
             const currentUserData = {
                 username: username,
                 accountName: accountName,
@@ -413,14 +477,14 @@
 
                 if (dbError) {
                     console.error("خطأ في إدخال الجدول:", dbError.message);
-                    errorDiv.innerText = "Error: " + dbError.message;
+                    errorDiv.innerText = dbError.message;
                     errorDiv.style.display = 'block';
                     return;
                 }
 
             } catch (err) {
                 console.log("Cloud sync note:", err);
-                errorDiv.innerText = "Unexpected Error: " + err.message;
+                errorDiv.innerText = err.message;
                 errorDiv.style.display = 'block';
                 return;
             }
