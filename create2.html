@@ -211,7 +211,7 @@
         const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx6dnRuZmRneW53Y3pya3dsd2hmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkxNDIxMTEsImV4cCI6MjEwNDcxODExMX0.w2hNlJ4SszyMBkUVjr1qiWNTTPxHMHkM9YOFtVP-pVI";
         const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        // 2. إعدادات Firebase (تم تضمين بيانات المشروع الخاصة بك)
+        // 2. إعدادات Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyBagL51Peeaa-sW0ppnYd_d-IF6Zj0IgsE",
             authDomain: "hssuhc784.firebaseapp.com",
@@ -222,7 +222,12 @@
             measurementId: "G-65VEXWQZWV"
         };
         firebase.initializeApp(firebaseConfig);
+        
         const googleStorage = firebase.storage();
+        
+        // رفع وقت الانتظار إلى 30 دقيقة (1,800,000 مللي ثانية) لمنع خطأ الـ Retry limit exceeded
+        googleStorage.setMaxUploadRetryTime(1800000);
+
         if (firebase.analytics) {
             firebase.analytics();
         }
@@ -335,12 +340,14 @@
             progressContainer.style.display = 'block';
 
             try {
-                // اسم ملف فريد للرفع إلى خوادم جوجل
                 const cleanFileName = `videos/${Date.now()}_${selectedVideoFile.name}`;
                 const storageRef = googleStorage.ref(cleanFileName);
-                const uploadTask = storageRef.put(selectedVideoFile);
 
-                // متابعة نسبة الرفع الحقيقية إلى خوادم جوجل
+                // البدء بعملية رفع قابلة للاستئناف والتحمل على شبكات الإنترنت المختلفة
+                const uploadTask = storageRef.put(selectedVideoFile, {
+                    contentType: selectedVideoFile.type
+                });
+
                 uploadTask.on('state_changed', 
                     (snapshot) => {
                         const progress = Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100);
@@ -355,7 +362,6 @@
                         progressContainer.style.display = 'none';
                     }, 
                     async () => {
-                        // 1. استخراج الرابط المباشر من جوجل
                         const googleVideoUrl = await uploadTask.snapshot.ref.getDownloadURL();
 
                         if (!googleVideoUrl) {
@@ -377,7 +383,6 @@
                             created_at: new Date().toISOString()
                         };
 
-                        // 2. حفظ الرابط فقط داخل قاعدة بيانات Supabase
                         const { error: dbError } = await supabaseClient
                             .from('videos')
                             .insert([videoData]);
@@ -390,7 +395,6 @@
                             return;
                         }
 
-                        // 3. حفظ البيانات محلياً للمزامنة السريعة
                         try {
                             let localVideos = JSON.parse(localStorage.getItem('videos') || '[]');
                             localVideos.unshift(videoData);
