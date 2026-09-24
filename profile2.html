@@ -1,10 +1,11 @@
-\<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Profile - Orange Design</title>
     
+    <!-- FontAwesome icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
     <!-- Supabase Library -->
@@ -13,22 +14,28 @@
     <style>
         :root {
             --bg-color: #F4EAE1;
+            --primary-color: #ff6600;
+            --primary-hover: #e55b00;
+        }
+        * {
+            box-sizing: border-box;
         }
         body { 
             margin: 0; 
             padding: 0; 
             background-color: var(--bg-color) !important; 
-            font-family: 'Segoe UI', sans-serif; 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
             overflow-x: hidden;
         }
 
+        /* Sidebar */
         .sidebar { 
             position: fixed; 
             right: 0; 
             top: 0; 
             height: 100%; 
             width: 80px; 
-            background: rgb(255, 255, 255); 
+            background: #ffffff; 
             display: flex; 
             flex-direction: column; 
             align-items: center; 
@@ -40,14 +47,15 @@
         
         .sidebar a { 
             margin-bottom: 35px; 
-            color: rgb(255, 136, 0); 
+            color: var(--primary-color); 
             font-size: 26px; 
             text-decoration: none; 
             transition: 0.3s;
         }
         .sidebar a:hover { transform: scale(1.2); color: #ffe0b2; }
-        .sidebar a.active { color: #e55b00; transform: scale(1.1); }
+        .sidebar a.active { color: var(--primary-hover); transform: scale(1.1); }
 
+        /* Header Top */
         .header-top {
             position: fixed;
             top: 0;
@@ -70,7 +78,7 @@
         .search-box input { 
             width: 100%; 
             padding: 10px 45px 10px 15px; 
-            border: 2px solid orange; 
+            border: 2px solid var(--primary-color); 
             border-radius: 50px; 
             outline: none;
         }
@@ -79,28 +87,32 @@
             right: 15px; 
             top: 50%; 
             transform: translateY(-50%); 
-            color: orange; 
+            color: var(--primary-color); 
         }
 
-        /* محتوى الحساب الشخصي */
-        .profile-container {
-            max-width: 600px;
-            margin: 140px auto 40px auto;
+        /* Main Container */
+        .main-wrapper {
+            max-width: 900px;
+            margin: 110px auto 50px auto;
+            padding: 0 20px;
+        }
+
+        /* Profile Card */
+        .profile-card {
             background: white;
-            padding: 40px 20px;
+            padding: 35px 25px;
             border-radius: 20px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.08);
             text-align: center;
-            direction: rtl;
+            margin-bottom: 30px;
         }
 
-        /* الدائرة البرتقالية وصورة الشخص الافتراضي */
         .profile-avatar-circle {
-            width: 110px;
-            height: 110px;
-            background-color: #ff6600;
+            width: 100px;
+            height: 100px;
+            background-color: var(--primary-color);
             border-radius: 50%;
-            margin: 0 auto 20px auto;
+            margin: 0 auto 15px auto;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -108,23 +120,222 @@
         }
 
         .profile-avatar-circle i {
-            font-size: 60px;
+            font-size: 55px;
             color: white;
         }
 
-        /* اسم المستخدم */
         .profile-username {
             font-size: 24px;
             font-weight: bold;
             color: #333;
-            margin-bottom: 8px;
+            margin-bottom: 5px;
         }
 
-        /* اسم الحساب / البريد الإلكتروني */
         .profile-handle {
             font-size: 15px;
-            color: #ff6600;
+            color: var(--primary-color);
             font-weight: 500;
+            margin-bottom: 10px;
+        }
+
+        .profile-phone {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 15px;
+        }
+
+        /* Tabs Navigation */
+        .tabs-nav {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #e0e0e0;
+            padding-bottom: 10px;
+        }
+
+        .tab-btn {
+            background: none;
+            border: none;
+            font-size: 17px;
+            font-weight: bold;
+            color: #777;
+            padding: 10px 20px;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: 0.3s;
+        }
+
+        .tab-btn.active {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Videos Section */
+        .videos-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 20px;
+        }
+
+        .video-card {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            display: flex;
+            flex-direction: column;
+            transition: 0.3s;
+        }
+
+        .video-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .video-preview {
+            width: 100%;
+            height: 160px;
+            background: #000;
+            object-fit: cover;
+        }
+
+        .video-info {
+            padding: 15px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .video-title {
+            font-size: 16px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+            word-break: break-word;
+        }
+
+        .video-stats {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            font-size: 13px;
+            color: #777;
+            margin-bottom: 15px;
+        }
+
+        .video-actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: bold;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .btn-primary { background: var(--primary-color); color: white; }
+        .btn-primary:hover { background: var(--primary-hover); }
+        
+        .btn-secondary { background: #eee; color: #333; }
+        .btn-secondary:hover { background: #ddd; }
+
+        .btn-danger { background: #e74c3c; color: white; }
+        .btn-danger:hover { background: #c0392b; }
+
+        /* Settings Form */
+        .settings-card {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            text-align: right;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #444;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            font-size: 15px;
+            outline: none;
+            transition: 0.3s;
+        }
+
+        .form-group input:focus {
+            border-color: var(--primary-color);
+        }
+
+        /* Modal popup */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 3000;
+        }
+
+        .modal-overlay.active { display: flex; }
+
+        .modal-box {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+        }
+
+        .modal-box h3 { margin-top: 0; color: #333; }
+
+        .modal-box input {
+            width: 100%;
+            padding: 10px;
+            margin: 15px 0;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 18px;
+            letter-spacing: 2px;
+        }
+
+        .no-videos {
+            text-align: center;
+            padding: 40px;
+            background: white;
+            border-radius: 15px;
+            color: #777;
         }
 
         @media (max-width: 768px) {
@@ -138,24 +349,14 @@
                 flex-direction: row;
                 justify-content: space-around;
                 padding-top: 0;
-                box-shadow: -2px 0 10px rgba(0,0,0,0.1);
+                box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
             }
-            .sidebar a {
-                margin-bottom: 0;
-                font-size: 22px;
-            }
-            .header-top {
-                right: 0;
-                height: 65px;
-                padding: 0 15px;
-                left: 0;
-            }
-            .profile-container {
-                margin: 100px 15px 80px 15px;
-                padding: 30px 15px;
-            }
+            .sidebar a { margin-bottom: 0; font-size: 22px; }
+            .header-top { right: 0; height: 65px; padding: 0 15px; left: 0; }
+            .main-wrapper { margin: 85px auto 80px auto; padding: 0 10px; }
         }
     </style>
+
     <script>
         (function () {
             const savedColor = localStorage.getItem('themeBgColor');
@@ -185,34 +386,354 @@
                 <button type="submit" style="background: none; border: none; padding: 0; cursor: pointer; color: inherit;">
                     <i class="fas fa-search"></i>
                 </button>
-                <input type="text" name="query" placeholder="Search for a video...">
+                <input type="text" name="query" placeholder="بحث عن فيديو...">
             </form>
         </div>
     </div>
 
-    <!-- Profile Content -->
-    <div class="profile-container">
-        <!-- الدائرة البرتقالية وفيها شكل الشخص الافتراضي الواضح -->
-        <div class="profile-avatar-circle">
-            <i class="fas fa-user"></i>
+    <!-- Main Content Wrapper -->
+    <div class="main-wrapper">
+        
+        <!-- Profile Info Card -->
+        <div class="profile-card">
+            <div class="profile-avatar-circle">
+                <i class="fas fa-user"></i>
+            </div>
+            <div class="profile-username" id="displayUsername">جاري التحميل...</div>
+            <div class="profile-handle" id="displayEmail">جاري التحميل...</div>
+            <div class="profile-phone" id="displayPhone">رقم الهاتف: غير محدد</div>
         </div>
-        
-        <!-- اسم المستخدم الواضح -->
-        <div class="profile-username" id="displayUsername">جارِ التحميل...</div>
-        
-        <!-- اسم الحساب / البريد تحته -->
-        <div class="profile-handle" id="displayEmail">جارِ التحميل...</div>
+
+        <!-- Navigation Tabs -->
+        <div class="tabs-nav">
+            <button class="tab-btn active" onclick="switchTab('my-videos')"><i class="fas fa-video"></i> فيديوهاتي</button>
+            <button class="tab-btn" onclick="switchTab('account-settings')"><i class="fas fa-user-gear"></i> إعدادات الحساب</button>
+        </div>
+
+        <!-- Tab 1: My Videos -->
+        <div id="my-videos" class="tab-content active">
+            <div id="videosGrid" class="videos-grid">
+                <div class="no-videos">جاري تحميل الفيديوهات الخاصة بك...</div>
+            </div>
+        </div>
+
+        <!-- Tab 2: Account Settings -->
+        <div id="account-settings" class="tab-content">
+            <div class="settings-card">
+                <h3><i class="fas fa-pen-to-square"></i> تعديل معلومات الحساب</h3>
+                
+                <form id="profileForm" onsubmit="handleProfileUpdate(event)">
+                    <div class="form-group">
+                        <label for="inputUsername">اسم المستخدم الجديد</label>
+                        <input type="text" id="inputUsername" placeholder="أدخل اسم المستخدم الجديد">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="inputPhone">رقم الموبايل</label>
+                        <input type="tel" id="inputPhone" placeholder="+964XXXXXXXXXX">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="inputPassword">كلمة المرور الجديدة (اختياري)</label>
+                        <input type="password" id="inputPassword" placeholder="أتركها فارغة إذا لا تريد التغيير">
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center; padding: 12px;">
+                        <i class="fas fa-paper-plane"></i> حفظ التغييرات وإرسال رمز التفعيل (OTP)
+                    </button>
+                </form>
+            </div>
+        </div>
+
     </div>
 
-    <script>
-        // جلب بيانات المستخدم المسجل وعرضها تلقائياً
-        window.addEventListener("DOMContentLoaded", () => {
-            const username = localStorage.getItem('user_username') || localStorage.getItem('username') || 'مستخدم Orange Design';
-            const email = localStorage.getItem('user_email') || localStorage.getItem('sb-lzvtnfdgynwczrkwlwhf-auth-token') ? (localStorage.getItem('user_email') || 'حساب مفعل عبر النظام') : 'غير متصل';
+    <!-- OTP Verification Modal -->
+    <div class="modal-overlay" id="otpModal">
+        <div class="modal-box">
+            <h3>تأكيد رمز الهاتف (OTP)</h3>
+            <p>تم إرسال رمز مكون من 6 أرقام إلى رقم الموبايل الخاص بك. يُرجى إدخاله لتأكيد التغييرات:</p>
+            <p style="font-size: 12px; color: #888;">(ملاحظة: يجب كتابة الرمز بالأرقام فقط. أي تغيير أو رمز خاطئ سيتم رفضه).</p>
+            
+            <input type="text" id="otpInput" maxlength="6" placeholder="000000" pattern="\d*">
+            
+            <div style="display: flex; gap: 10px; justify-content: center;">
+                <button class="btn btn-primary" onclick="verifyOtpCode()"><i class="fas fa-check"></i> تأكيد</button>
+                <button class="btn btn-danger" onclick="closeOtpModal()"><i class="fas fa-xmark"></i> إلغاء / رفض</button>
+            </div>
+        </div>
+    </div>
 
-            document.getElementById('displayUsername').textContent = username;
-            document.getElementById('displayEmail').textContent = email;
+    <!-- Script Supabase and Logic -->
+    <script>
+        // 1. إعداد Supabase (استبدل هذه القيم بـ URL و API Key الخاصين بك في Supabase)
+        const SUPABASE_URL = "https://your-supabase-url.supabase.co"; 
+        const SUPABASE_KEY = "your-anon-key";
+        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        let currentUser = null;
+        let generatedOtpCode = null; // الرمز الفريد
+        let pendingUpdateData = null; // البيانات المؤقتة لانتظار التحقق
+
+        // التبديل بين التبويبات (فيديوهاتي / إعدادات الحساب)
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            
+            event.currentTarget.classList.add('active');
+            document.getElementById(tabId).classList.add('active');
+        }
+
+        // تحميل البيانات عند فتح الصفحة
+        window.addEventListener("DOMContentLoaded", async () => {
+            await loadUserData();
+            await fetchUserVideos();
         });
+
+        // 2. تحميل بيانات المستخدم
+        async function loadUserData() {
+            // جلب الجلسة الحالية
+            const { data: { session } } = await supabase.auth.getSession();
+            
+            if (session && session.user) {
+                currentUser = session.user;
+                
+                const username = currentUser.user_metadata?.username || localStorage.getItem('user_username') || 'مستخدم Orange';
+                const email = currentUser.email || localStorage.getItem('user_email') || 'غير محدد';
+                const phone = currentUser.phone || currentUser.user_metadata?.phone || localStorage.getItem('user_phone') || 'غير محدد';
+
+                document.getElementById('displayUsername').textContent = username;
+                document.getElementById('displayEmail').textContent = email;
+                document.getElementById('displayPhone').textContent = 'رقم الهاتف: ' + phone;
+
+                document.getElementById('inputUsername').value = username;
+                document.getElementById('inputPhone').value = phone !== 'غير محدد' ? phone : '';
+            } else {
+                // بيانات تجريبية أو احتياطية في حال استخدام LocalStorage
+                const username = localStorage.getItem('user_username') || 'مستخدم Orange Design';
+                const email = localStorage.getItem('user_email') || 'حساب مفعل عبر النظام';
+                const phone = localStorage.getItem('user_phone') || 'غير محدد';
+
+                document.getElementById('displayUsername').textContent = username;
+                document.getElementById('displayEmail').textContent = email;
+                document.getElementById('displayPhone').textContent = 'رقم الهاتف: ' + phone;
+                
+                document.getElementById('inputUsername').value = username;
+                document.getElementById('inputPhone').value = phone !== 'غير محدد' ? phone : '';
+            }
+        }
+
+        // 3. جلب فيديوهات المستخدم الحالي فقط من Supabase
+        async function fetchUserVideos() {
+            const container = document.getElementById('videosGrid');
+            
+            if (!currentUser) {
+                container.innerHTML = '<div class="no-videos">يرجى تسجيل الدخول لعرض فيديوهاتك.</div>';
+                return;
+            }
+
+            // الاستعلام من جدول فيديوهات Supabase بناءً على ID المستخدم الحالي فقط
+            const { data: videos, error } = await supabase
+                .from('videos')
+                .select('*')
+                .eq('user_id', currentUser.id) // تصفية لعدم إظهار فيديوهات الآخرين
+                .order('created_at', { ascending: false });
+
+            if (error) {
+                console.error("خطأ في جلب الفيديوهات:", error);
+                container.innerHTML = '<div class="no-videos">حدث خطأ أثناء تحميل الفيديوهات.</div>';
+                return;
+            }
+
+            if (!videos || videos.length === 0) {
+                container.innerHTML = '<div class="no-videos">لم تقم بنشر أي فيديو بعد.</div>';
+                return;
+            }
+
+            // عرض الفيديوهات
+            container.innerHTML = '';
+            videos.forEach(video => {
+                const viewsCount = video.views || 0;
+                const videoUrl = video.video_url; // رابط الفيديو المتواجد بـ Supabase Storage
+
+                const card = document.createElement('div');
+                card.className = 'video-card';
+                card.innerHTML = `
+                    <video class="video-preview" src="${videoUrl}" controls></video>
+                    <div class="video-info">
+                        <div class="video-title" id="title-${video.id}">${escapeHtml(video.title)}</div>
+                        <div class="video-stats">
+                            <span><i class="fas fa-eye"></i> ${viewsCount} مشاهدة</span>
+                        </div>
+                        <div class="video-actions">
+                            <button class="btn btn-secondary" onclick="copyVideoUrl('${videoUrl}')">
+                                <i class="fas fa-link"></i> نسخ الرابط
+                            </button>
+                            <button class="btn btn-primary" onclick="editVideoTitle('${video.id}', '${escapeHtml(video.title)}')">
+                                <i class="fas fa-pen"></i> تعديل
+                            </button>
+                            <button class="btn btn-danger" onclick="deleteVideo('${video.id}')">
+                                <i class="fas fa-trash"></i> حذف
+                            </button>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // نسخ رابط الفيديو
+        function copyVideoUrl(url) {
+            navigator.clipboard.writeText(url).then(() => {
+                alert("تم نسخ رابط الفيديو بنجاح!");
+            }).catch(err => {
+                alert("فشل في نسخ الرابط: " + err);
+            });
+        }
+
+        // تعديل عنوان الفيديو
+        async function editVideoTitle(videoId, oldTitle) {
+            const newTitle = prompt("أدخل العنوان الجديد للفيديو:", oldTitle);
+            if (newTitle && newTitle.trim() !== "" && newTitle !== oldTitle) {
+                const { error } = await supabase
+                    .from('videos')
+                    .update({ title: newTitle.trim() })
+                    .eq('id', videoId)
+                    .eq('user_id', currentUser.id);
+
+                if (error) {
+                    alert("فشل تعديل عنوان الفيديو: " + error.message);
+                } else {
+                    alert("تم تعديل العنوان بنجاح!");
+                    document.getElementById(`title-${videoId}`).textContent = newTitle.trim();
+                }
+            }
+        }
+
+        // حذف الفيديو
+        async function deleteVideo(videoId) {
+            if (confirm("هل أنت تأكد من إمكانية حذف هذا الفيديو؟")) {
+                const { error } = await supabase
+                    .from('videos')
+                    .delete()
+                    .eq('id', videoId)
+                    .eq('user_id', currentUser.id);
+
+                if (error) {
+                    alert("فشل حذف الفيديو: " + error.message);
+                } else {
+                    alert("تم حذف الفيديو بنجاح!");
+                    fetchUserVideos(); // إعادة تحميل الفيديوهات
+                }
+            }
+        }
+
+        // 4. التعامل مع تقديم نموذج تعديل الحساب (إرسال رمز OTP للموبايل)
+        async function handleProfileUpdate(event) {
+            event.preventDefault();
+
+            const newUsername = document.getElementById('inputUsername').value.trim();
+            const newPhone = document.getElementById('inputPhone').value.trim();
+            const newPassword = document.getElementById('inputPassword').value;
+
+            if (!newPhone) {
+                alert("يرجى أدخال رقم الموبايل لاستلام رمز التفعيل OTP.");
+                return;
+            }
+
+            // توليد رمز فريد مكون من 6 أرقام عشوائية
+            generatedOtpCode = Math.floor(100000 + Math.random() * 900000).toString();
+
+            // حفظ التغييرات المطلوبة في المتغير لحين التحقق من الرمز
+            pendingUpdateData = {
+                username: newUsername,
+                phone: newPhone,
+                password: newPassword
+            };
+
+            // محاكاة أو استخدام Supabase لإرسال OTP إلى الرقم المدخل
+            try {
+                // إذا أردت تفعيل إرسال SMS الحقيقي عبر Supabase:
+                /* 
+                const { error } = await supabase.auth.signInWithOtp({ phone: newPhone }); 
+                if(error) throw error;
+                */
+
+                // إظهار تنبيه الرمز تجريبياً
+                console.log("رمز OTP الفريد المرسل إلى الهاتف:", generatedOtpCode);
+                alert(`[تنبيه الرمز الفريد OTP]: تم إرسال الرمز الفريد (${generatedOtpCode}) إلى الرقم ${newPhone}`);
+
+                // فتح النافذة المنبثقة لإدخال الرمز
+                document.getElementById('otpModal').classList.add('active');
+
+            } catch (err) {
+                alert("حدث خطأ أثناء إرسال الرمز: " + err.message);
+            }
+        }
+
+        // 5. التحقق من رمز OTP وإتمام التحديثات أو رفض أي تغيير خاطئ
+        async function verifyOtpCode() {
+            const enteredOtp = document.getElementById('otpInput').value.trim();
+
+            // التحقق أن المدخل عبارة عن أرقام فقط
+            if (!/^\d+$/.test(enteredOtp)) {
+                alert("خطأ: يرجى كتابة الرمز المكون من أرقام فقط! تم رفض التغيير.");
+                rejectChanges();
+                return;
+            }
+
+            // مطابقة الرمز
+            if (enteredOtp !== generatedOtpCode) {
+                alert("رمز OTP غير صحيح! تم رفض ورفض أي تغيير.");
+                rejectChanges();
+                return;
+            }
+
+            // إذا كان الرمز صحيحاً تماماً -> حفظ التغييرات في Supabase
+            try {
+                const updatePayload = {
+                    data: { username: pendingUpdateData.username, phone: pendingUpdateData.phone }
+                };
+
+                if (pendingUpdateData.password) {
+                    updatePayload.password = pendingUpdateData.password;
+                }
+
+                if (currentUser) {
+                    const { error } = await supabase.auth.updateUser(updatePayload);
+                    if (error) throw error;
+                }
+
+                // حفظ في LocalStorage كنسخة احتياطية
+                localStorage.setItem('user_username', pendingUpdateData.username);
+                localStorage.setItem('user_phone', pendingUpdateData.phone);
+
+                alert("تم تحديث بيانات الحساب بنجاح وتأكيد رقم الموبايل!");
+                
+                closeOtpModal();
+                loadUserData(); // إعادة تحديث واجهة المستخدم
+
+            } catch (err) {
+                alert("فشل تحديث بيانات الحساب: " + err.message);
+                rejectChanges();
+            }
+        }
+
+        // رفض التغييرات وإغلاق النافذة
+        function rejectChanges() {
+            pendingUpdateData = null;
+            generatedOtpCode = null;
+            closeOtpModal();
+        }
+
+        function closeOtpModal() {
+            document.getElementById('otpModal').classList.remove('active');
+            document.getElementById('otpInput').value = '';
+        }
+
+        // دالة مساعدة لمنع الثغرات (HTML Escaping)
+        function escapeHtml(str) {
+            return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+        }
     </script>
 </body>
 </html>
