@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="ar" dir="rtl" id="htmlRoot">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -25,7 +25,9 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
+            min-height: 100vh;
+            padding: 20px 0;
+            box-sizing: border-box;
         }
 
         .signup-container {
@@ -34,14 +36,14 @@
             border-radius: 24px;
             box-shadow: 0 15px 35px rgba(0, 0, 0, 0.06);
             width: 100%;
-            max-width: 420px;
+            max-width: 440px;
             box-sizing: border-box;
             border: 1px solid rgba(255, 255, 255, 0.8);
         }
 
         .brand-header {
             text-align: center;
-            margin-bottom: 35px;
+            margin-bottom: 30px;
         }
 
         .brand-header .icon-box {
@@ -71,7 +73,7 @@
         }
 
         .input-group {
-            margin-bottom: 20px;
+            margin-bottom: 18px;
         }
 
         .input-group label {
@@ -86,22 +88,38 @@
             position: relative;
         }
 
-        .input-wrapper input {
+        .input-wrapper input, .input-wrapper select {
             width: 100%;
-            padding: 14px 15px 14px 45px;
+            padding: 14px 15px;
             background: #FAFAFA;
             border: 1.5px solid var(--border-light);
             border-radius: 14px;
             outline: none;
-            font-size: 15px;
+            font-size: 14px;
             color: var(--text-main);
             box-sizing: border-box;
             transition: all 0.3s ease;
-            text-align: left;
-            direction: ltr;
+            appearance: none;
         }
 
-        .input-wrapper input:focus {
+        /* تحكم بأماكن الأيقونات والنصوص بناءً على اتجاه الصفحة */
+        [dir="rtl"] .input-wrapper input, [dir="rtl"] .input-wrapper select {
+            padding-right: 45px;
+            text-align: right;
+        }
+        [dir="rtl"] .input-wrapper i {
+            right: 16px;
+        }
+
+        [dir="ltr"] .input-wrapper input, [dir="ltr"] .input-wrapper select {
+            padding-left: 45px;
+            text-align: left;
+        }
+        [dir="ltr"] .input-wrapper i {
+            left: 16px;
+        }
+
+        .input-wrapper input:focus, .input-wrapper select:focus {
             border-color: var(--accent-color);
             background: #FFFFFF;
             box-shadow: 0 0 0 4px rgba(255, 102, 0, 0.1);
@@ -109,11 +127,11 @@
 
         .input-wrapper i {
             position: absolute;
-            left: 16px;
             top: 50%;
             transform: translateY(-50%);
             color: var(--text-muted);
             font-size: 16px;
+            pointer-events: none;
         }
 
         .signup-btn {
@@ -157,16 +175,50 @@
             <div class="icon-box">
                 <i class="fas fa-video"></i>
             </div>
-            <h2>إنشاء حساب جديد</h2>
-            <p>مكتبة الفيديوهات الخاصة بك</p>
+            <h2 id="uiTitle">إنشاء حساب جديد</h2>
+            <p id="uiSubTitle">مكتبة الفيديوهات الخاصة بك</p>
         </div>
 
         <div id="errorMsg" class="error-msg"></div>
         
         <form id="accountForm">
+            <!-- اختيار اللغة -->
+            <div class="input-group">
+                <label id="lblLanguage">اللغة المفضلة / Language</label>
+                <div class="input-wrapper">
+                    <i class="fas fa-globe"></i>
+                    <select id="languageSelect" onchange="changeLanguage(this.value)">
+                        <!-- اللغات الأساسية المطلوبة -->
+                        <option value="en-US">English (United States)</option>
+                        <option value="en-GB">English (United Kingdom)</option>
+                        <option value="ar" selected>العربية</option>
+                        <option value="ru">Русский</option>
+                        <option value="it">Italiano</option>
+                        <option value="he">עברית</option>
+                        
+                        <!-- باقي اللغات العالمية -->
+                        <option value="es">Español</option>
+                        <option value="fr">Français</option>
+                        <option value="de">Deutsch</option>
+                        <option value="pt-BR">Português (Brasil)</option>
+                        <option value="tr">Türkçe</option>
+                        <option value="fa">فارسی</option>
+                        <option value="ur">اردو</option>
+                        <option value="zh">中文 (简体)</option>
+                        <option value="ja">日本語</option>
+                        <option value="ko">한국어</option>
+                        <option value="uk">Українська</option>
+                        <option value="pl">Polski</option>
+                        <option value="nl">Nederlands</option>
+                        <option value="el">Ελληνικά</option>
+                        <option value="hi">हिन्दी</option>
+                    </select>
+                </div>
+            </div>
+
             <!-- 1. اسم المستخدم (مع شرط @) -->
             <div class="input-group">
-                <label>اسم المستخدم</label>
+                <label id="lblUsername">اسم المستخدم</label>
                 <div class="input-wrapper">
                     <i class="fas fa-at"></i>
                     <input type="text" id="username" placeholder="@username" required>
@@ -175,7 +227,7 @@
 
             <!-- 2. اسم الحساب -->
             <div class="input-group">
-                <label>اسم الحساب</label>
+                <label id="lblAccountName">اسم الحساب</label>
                 <div class="input-wrapper">
                     <i class="fas fa-user"></i>
                     <input type="text" id="accountName" placeholder="الاسم الظاهر" required>
@@ -184,14 +236,14 @@
             
             <!-- 3. مفتاح الدخول (كلمة السر) -->
             <div class="input-group">
-                <label>مفتاح الدخول</label>
+                <label id="lblPassword">مفتاح الدخول</label>
                 <div class="input-wrapper">
                     <i class="fas fa-lock"></i>
                     <input type="password" id="password" placeholder="••••••••" required>
                 </div>
             </div>
 
-            <button type="submit" class="signup-btn">بدء الاستخدام</button>
+            <button type="submit" class="signup-btn" id="btnSubmit">بدء الاستخدام</button>
         </form>
     </div>
 
@@ -202,30 +254,141 @@
 
         const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+        // قاموس الترجمات للواجهة
+        const translations = {
+            ar: {
+                title: "إنشاء حساب جديد",
+                subtitle: "مكتبة الفيديوهات الخاصة بك",
+                langLabel: "اللغة المفضلة",
+                userLabel: "اسم المستخدم",
+                accLabel: "اسم الحساب",
+                passLabel: "مفتاح الدخول",
+                btnText: "بدء الاستخدام",
+                placeholderAcc: "الاسم الظاهر",
+                errAt: "يجب أن يبدأ اسم المستخدم بحرف @ إجبارياً"
+            },
+            "en-US": {
+                title: "Create New Account",
+                subtitle: "Your Personal Video Library",
+                langLabel: "Preferred Language",
+                userLabel: "Username",
+                accLabel: "Account Name",
+                passLabel: "Password",
+                btnText: "Get Started",
+                placeholderAcc: "Display Name",
+                errAt: "Username must start with @ character"
+            },
+            "en-GB": {
+                title: "Create New Account",
+                subtitle: "Your Personal Video Library",
+                langLabel: "Preferred Language",
+                userLabel: "Username",
+                accLabel: "Account Name",
+                passLabel: "Password",
+                btnText: "Get Started",
+                placeholderAcc: "Display Name",
+                errAt: "Username must start with @ character"
+            },
+            ru: {
+                title: "Создать аккаунт",
+                subtitle: "Ваша видеотека",
+                langLabel: "Предпочитаемый язык",
+                userLabel: "Имя пользователя",
+                accLabel: "Отображаемое имя",
+                passLabel: "Пароль",
+                btnText: "Начать",
+                placeholderAcc: "Отображаемое имя",
+                errAt: "Имя пользователя должно начинаться с @"
+            },
+            it: {
+                title: "Crea nuovo account",
+                subtitle: "La tua libreria video",
+                langLabel: "Lingua preferita",
+                userLabel: "Nome utente",
+                accLabel: "Nome account",
+                passLabel: "Password",
+                btnText: "Inizia",
+                placeholderAcc: "Nome visualizzato",
+                errAt: "Il nome utente deve iniziare con @"
+            },
+            he: {
+                title: "צור חשבון חדש",
+                subtitle: "ספריית הווידאו שלך",
+                langLabel: "שפה מועדפת",
+                userLabel: "שם משתמש",
+                accLabel: "שם החשבון",
+                passLabel: "סיסמה",
+                btnText: "התחל להתמש",
+                placeholderAcc: "שם תצוגה",
+                errAt: "שם המשתמש חייב להתחיל ב-@"
+            }
+        };
+
+        // دالة تغيير اللغة والاتجاه للصفحة تلقائياً
+        function changeLanguage(langCode) {
+            const htmlRoot = document.getElementById('htmlRoot');
+            const rtlLangs = ['ar', 'he', 'fa', 'ur'];
+
+            // ضبط اتجاه النص RTL أو LTR
+            if (rtlLangs.includes(langCode)) {
+                htmlRoot.setAttribute('dir', 'rtl');
+            } else {
+                htmlRoot.setAttribute('dir', 'ltr');
+            }
+            htmlRoot.setAttribute('lang', langCode);
+
+            // الحصول على الترجمة المناسبة أو استخدام الإنجليزية كافتراضي
+            const t = translations[langCode] || translations['en-US'];
+
+            document.getElementById('uiTitle').innerText = t.title;
+            document.getElementById('uiSubTitle').innerText = t.subtitle;
+            document.getElementById('lblLanguage').innerText = t.langLabel;
+            document.getElementById('lblUsername').innerText = t.userLabel;
+            document.getElementById('lblAccountName').innerText = t.accLabel;
+            document.getElementById('lblPassword').innerText = t.passLabel;
+            document.getElementById('btnSubmit').innerText = t.btnText;
+            document.getElementById('accountName').placeholder = t.placeholderAcc;
+        }
+
+        // معالجة نموذج التسجيل
         document.getElementById('accountForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
+            const selectedLang = document.getElementById('languageSelect').value;
             const username = document.getElementById('username').value.trim();
             const accountName = document.getElementById('accountName').value.trim();
             const password = document.getElementById('password').value.trim();
             const errorDiv = document.getElementById('errorMsg');
             
+            const t = translations[selectedLang] || translations['en-US'];
             errorDiv.style.display = 'none';
 
             // الشرط الإجباري: التحقق من أن اسم المستخدم يبدأ بـ @
             if (!username.startsWith('@')) {
-                errorDiv.innerText = "يجب أن يبدأ اسم المستخدم بحرف @ إجبارياً";
+                errorDiv.innerText = t.errAt;
                 errorDiv.style.display = 'block';
                 return;
             }
 
-            // 1. التخزين المحلي في الجهاز
+            // توليد رابط الصورة الرمزية التلقائية بناءً على الاسم
+            const userAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(accountName)}&background=ff6600&color=fff`;
+
+            // 1. التخزين المحلي الشامل في LocalStorage (كائن موحد + مفاتيح منفصلة)
+            const currentUserData = {
+                username: username,
+                accountName: accountName,
+                password: password,
+                language: selectedLang,
+                avatar: userAvatar
+            };
+
+            localStorage.setItem('currentUser', JSON.stringify(currentUserData));
             localStorage.setItem('user_username', username);
             localStorage.setItem('user_account_name', accountName);
             localStorage.setItem('user_password', password);
-            localStorage.setItem('user_email', username);
+            localStorage.setItem('user_language', selectedLang);
 
-            // 2. التخزين السحابي عبر Supabase (تسجيل + إدخال مباشر في جدول accounts)
+            // 2. التخزين السحابي عبر Supabase
             try {
                 const { error: authError } = await supabaseClient.auth.signUp({
                     email: username.replace('@', '') + "@orange.local",
@@ -243,20 +406,21 @@
                         { 
                             username: username, 
                             account_name: accountName, 
-                            password: password 
+                            password: password,
+                            language: selectedLang
                         }
                     ]);
 
                 if (dbError) {
                     console.error("خطأ في إدخال الجدول:", dbError.message);
-                    errorDiv.innerText = "خطأ في حفظ الحساب بالقاعدة: " + dbError.message;
+                    errorDiv.innerText = "Error: " + dbError.message;
                     errorDiv.style.display = 'block';
                     return;
                 }
 
             } catch (err) {
                 console.log("Cloud sync note:", err);
-                errorDiv.innerText = "حدث خطأ غير متوقع: " + err.message;
+                errorDiv.innerText = "Unexpected Error: " + err.message;
                 errorDiv.style.display = 'block';
                 return;
             }
