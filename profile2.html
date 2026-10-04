@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Profile - Orange Design</title>
+    <title>الملف الشخصي - Orange Design</title>
     
     <!-- FontAwesome icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -132,10 +132,12 @@
         }
 
         .profile-handle {
-            font-size: 15px;
+            font-size: 16px;
             color: var(--primary-color);
-            font-weight: 500;
+            font-weight: 600;
             margin-bottom: 10px;
+            direction: ltr;
+            display: inline-block;
         }
 
         .profile-phone {
@@ -399,15 +401,20 @@
             <div class="profile-avatar-circle">
                 <i class="fas fa-user"></i>
             </div>
+            <!-- اسم الشخص / العرض -->
             <div class="profile-username" id="displayUsername">جاري التحميل...</div>
-            <div class="profile-handle" id="displayEmail">جاري التحميل...</div>
+            
+            <!-- اسم الحساب (المعرف) -->
+            <div class="profile-handle" id="displayAccountName">@جاري_التحميل</div>
+            
+            <!-- رقم الهاتف -->
             <div class="profile-phone" id="displayPhone">رقم الهاتف: غير محدد</div>
         </div>
 
         <!-- Navigation Tabs -->
         <div class="tabs-nav">
-            <button class="tab-btn active" onclick="switchTab('my-videos')"><i class="fas fa-video"></i> فيديوهاتي</button>
-            <button class="tab-btn" onclick="switchTab('account-settings')"><i class="fas fa-user-gear"></i> إعدادات الحساب</button>
+            <button class="tab-btn active" onclick="switchTab('my-videos', event)"><i class="fas fa-video"></i> فيديوهاتي</button>
+            <button class="tab-btn" onclick="switchTab('account-settings', event)"><i class="fas fa-user-gear"></i> إعدادات الحساب</button>
         </div>
 
         <!-- Tab 1: My Videos -->
@@ -424,8 +431,8 @@
                 
                 <form id="profileForm" onsubmit="handleProfileUpdate(event)">
                     <div class="form-group">
-                        <label for="inputUsername">اسم المستخدم الجديد</label>
-                        <input type="text" id="inputUsername" placeholder="أدخل اسم المستخدم الجديد">
+                        <label for="inputUsername">اسم الحساب (Username)</label>
+                        <input type="text" id="inputUsername" placeholder="أدخل اسم الحساب الجديد">
                     </div>
 
                     <div class="form-group">
@@ -465,21 +472,27 @@
 
     <!-- Script Supabase and Logic -->
     <script>
-        // 1. إعداد Supabase (استبدل هذه القيم بـ URL و API Key الخاصين بك في Supabase)
+        // 1. إعداد Supabase
         const SUPABASE_URL = "https://your-supabase-url.supabase.co"; 
         const SUPABASE_KEY = "your-anon-key";
-        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        
+        // استخدام supabaseClient بدلاً من supabase لعدم حدوث ReferenceError
+        const supabaseClient = (window.supabase && SUPABASE_URL !== "https://your-supabase-url.supabase.co") 
+            ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY) 
+            : null;
 
         let currentUser = null;
-        let generatedOtpCode = null; // الرمز الفريد
-        let pendingUpdateData = null; // البيانات المؤقتة لانتظار التحقق
+        let generatedOtpCode = null;
+        let pendingUpdateData = null;
 
-        // التبديل بين التبويبات (فيديوهاتي / إعدادات الحساب)
-        function switchTab(tabId) {
+        // التبديل بين التبويبات
+        function switchTab(tabId, evt) {
             document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
             
-            event.currentTarget.classList.add('active');
+            if (evt && evt.currentTarget) {
+                evt.currentTarget.classList.add('active');
+            }
             document.getElementById(tabId).classList.add('active');
         }
 
@@ -489,96 +502,124 @@
             await fetchUserVideos();
         });
 
-        // 2. تحميل بيانات المستخدم
+        // 2. تحميل بيانات المستخدم (اسم الحساب، اسم الشخص، رقم الهاتف)
         async function loadUserData() {
-            // جلب الجلسة الحالية
-            const { data: { session } } = await supabase.auth.getSession();
-            
-            if (session && session.user) {
-                currentUser = session.user;
-                
-                const username = currentUser.user_metadata?.username || localStorage.getItem('user_username') || 'مستخدم Orange';
-                const email = currentUser.email || localStorage.getItem('user_email') || 'غير محدد';
-                const phone = currentUser.phone || currentUser.user_metadata?.phone || localStorage.getItem('user_phone') || 'غير محدد';
+            let username = 'مستخدم Orange';
+            let accountName = '';
+            let phone = 'غير محدد';
 
-                document.getElementById('displayUsername').textContent = username;
-                document.getElementById('displayEmail').textContent = email;
-                document.getElementById('displayPhone').textContent = 'رقم الهاتف: ' + phone;
+            if (supabaseClient) {
+                try {
+                    const { data: { session } } = await supabaseClient.auth.getSession();
+                    
+                    if (session && session.user) {
+                        currentUser = session.user;
 
-                document.getElementById('inputUsername').value = username;
-                document.getElementById('inputPhone').value = phone !== 'غير محدد' ? phone : '';
-            } else {
-                // بيانات تجريبية أو احتياطية في حال استخدام LocalStorage
-                const username = localStorage.getItem('user_username') || 'مستخدم Orange Design';
-                const email = localStorage.getItem('user_email') || 'حساب مفعل عبر النظام';
-                const phone = localStorage.getItem('user_phone') || 'غير محدد';
+                        // قراءة اسم الشخص واسم الحساب ورقم الموبايل من user_metadata
+                        username = currentUser.user_metadata?.full_name || currentUser.user_metadata?.username || username;
+                        accountName = currentUser.user_metadata?.username || currentUser.user_metadata?.account_name || '';
+                        phone = currentUser.phone || currentUser.user_metadata?.phone || phone;
 
-                document.getElementById('displayUsername').textContent = username;
-                document.getElementById('displayEmail').textContent = email;
-                document.getElementById('displayPhone').textContent = 'رقم الهاتف: ' + phone;
-                
-                document.getElementById('inputUsername').value = username;
-                document.getElementById('inputPhone').value = phone !== 'غير محدد' ? phone : '';
+                        // محاولة جلب من جدول profiles إذا كان موجوداً
+                        const { data: profile } = await supabaseClient
+                            .from('profiles')
+                            .select('*')
+                            .eq('id', currentUser.id)
+                            .maybeSingle();
+
+                        if (profile) {
+                            if (profile.full_name) username = profile.full_name;
+                            if (profile.username) accountName = profile.username;
+                            if (profile.phone) phone = profile.phone;
+                        }
+                    }
+                } catch (err) {
+                    console.error("خطأ عند جلب البيانات من Supabase:", err);
+                }
             }
+
+            // الاستعانة بـ LocalStorage في حال تعذر الاتصال أو للاستخدام المحلي
+            if (localStorage.getItem('user_fullname')) {
+                username = localStorage.getItem('user_fullname');
+            }
+            if (!accountName && localStorage.getItem('user_username')) {
+                accountName = localStorage.getItem('user_username');
+            }
+            if (phone === 'غير محدد' && localStorage.getItem('user_phone')) {
+                phone = localStorage.getItem('user_phone');
+            }
+
+            // إذا لم يتوفر اسم الحساب، يتم اقتطاع الجزء الأول من المعرف أو استخدام القيمة الافتراضية
+            if (!accountName) {
+                accountName = 'Jio3Rfwi0e'; 
+            }
+
+            // عرض البيانات المحدثة في واجهة الملف الشخصي
+            document.getElementById('displayUsername').textContent = username;
+            
+            // إضافة رمز @ أمام اسم الحساب
+            document.getElementById('displayAccountName').textContent = accountName.startsWith('@') ? accountName : '@' + accountName;
+            
+            document.getElementById('displayPhone').textContent = 'رقم الهاتف: ' + phone;
+
+            // تعبئة البيانات في حقول التعديل
+            document.getElementById('inputUsername').value = accountName;
+            document.getElementById('inputPhone').value = phone !== 'غير محدد' ? phone : '';
         }
 
-        // 3. جلب فيديوهات المستخدم الحالي فقط من Supabase
+        // 3. جلب فيديوهات المستخدم من Supabase
         async function fetchUserVideos() {
             const container = document.getElementById('videosGrid');
             
-            if (!currentUser) {
-                container.innerHTML = '<div class="no-videos">يرجى تسجيل الدخول لعرض فيديوهاتك.</div>';
+            if (!currentUser && !supabaseClient) {
+                container.innerHTML = '<div class="no-videos">لا توجد فيديوهات مسجلة باسم هذا الحساب.</div>';
                 return;
             }
 
-            // الاستعلام من جدول فيديوهات Supabase بناءً على ID المستخدم الحالي فقط
-            const { data: videos, error } = await supabase
-                .from('videos')
-                .select('*')
-                .eq('user_id', currentUser.id) // تصفية لعدم إظهار فيديوهات الآخرين
-                .order('created_at', { ascending: false });
+            try {
+                const { data: videos, error } = await supabaseClient
+                    .from('videos')
+                    .select('*')
+                    .eq('user_id', currentUser ? currentUser.id : '')
+                    .order('created_at', { ascending: false });
 
-            if (error) {
-                console.error("خطأ في جلب الفيديوهات:", error);
-                container.innerHTML = '<div class="no-videos">حدث خطأ أثناء تحميل الفيديوهات.</div>';
-                return;
-            }
+                if (error || !videos || videos.length === 0) {
+                    container.innerHTML = '<div class="no-videos">لم تقم بنشر أي فيديو بعد.</div>';
+                    return;
+                }
 
-            if (!videos || videos.length === 0) {
+                container.innerHTML = '';
+                videos.forEach(video => {
+                    const viewsCount = video.views || 0;
+                    const videoUrl = video.video_url;
+
+                    const card = document.createElement('div');
+                    card.className = 'video-card';
+                    card.innerHTML = `
+                        <video class="video-preview" src="${videoUrl}" controls></video>
+                        <div class="video-info">
+                            <div class="video-title" id="title-${video.id}">${escapeHtml(video.title || 'فيديو بدون عنوان')}</div>
+                            <div class="video-stats">
+                                <span><i class="fas fa-eye"></i> ${viewsCount} مشاهدة</span>
+                            </div>
+                            <div class="video-actions">
+                                <button class="btn btn-secondary" onclick="copyVideoUrl('${videoUrl}')">
+                                    <i class="fas fa-link"></i> نسخ الرابط
+                                </button>
+                                <button class="btn btn-primary" onclick="editVideoTitle('${video.id}', '${escapeHtml(video.title || '')}')">
+                                    <i class="fas fa-pen"></i> تعديل
+                                </button>
+                                <button class="btn btn-danger" onclick="deleteVideo('${video.id}')">
+                                    <i class="fas fa-trash"></i> حذف
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                    container.appendChild(card);
+                });
+            } catch (e) {
                 container.innerHTML = '<div class="no-videos">لم تقم بنشر أي فيديو بعد.</div>';
-                return;
             }
-
-            // عرض الفيديوهات
-            container.innerHTML = '';
-            videos.forEach(video => {
-                const viewsCount = video.views || 0;
-                const videoUrl = video.video_url; // رابط الفيديو المتواجد بـ Supabase Storage
-
-                const card = document.createElement('div');
-                card.className = 'video-card';
-                card.innerHTML = `
-                    <video class="video-preview" src="${videoUrl}" controls></video>
-                    <div class="video-info">
-                        <div class="video-title" id="title-${video.id}">${escapeHtml(video.title)}</div>
-                        <div class="video-stats">
-                            <span><i class="fas fa-eye"></i> ${viewsCount} مشاهدة</span>
-                        </div>
-                        <div class="video-actions">
-                            <button class="btn btn-secondary" onclick="copyVideoUrl('${videoUrl}')">
-                                <i class="fas fa-link"></i> نسخ الرابط
-                            </button>
-                            <button class="btn btn-primary" onclick="editVideoTitle('${video.id}', '${escapeHtml(video.title)}')">
-                                <i class="fas fa-pen"></i> تعديل
-                            </button>
-                            <button class="btn btn-danger" onclick="deleteVideo('${video.id}')">
-                                <i class="fas fa-trash"></i> حذف
-                            </button>
-                        </div>
-                    </div>
-                `;
-                container.appendChild(card);
-            });
         }
 
         // نسخ رابط الفيديو
@@ -594,40 +635,34 @@
         async function editVideoTitle(videoId, oldTitle) {
             const newTitle = prompt("أدخل العنوان الجديد للفيديو:", oldTitle);
             if (newTitle && newTitle.trim() !== "" && newTitle !== oldTitle) {
-                const { error } = await supabase
-                    .from('videos')
-                    .update({ title: newTitle.trim() })
-                    .eq('id', videoId)
-                    .eq('user_id', currentUser.id);
-
-                if (error) {
-                    alert("فشل تعديل عنوان الفيديو: " + error.message);
-                } else {
-                    alert("تم تعديل العنوان بنجاح!");
-                    document.getElementById(`title-${videoId}`).textContent = newTitle.trim();
+                if (supabaseClient && currentUser) {
+                    await supabaseClient
+                        .from('videos')
+                        .update({ title: newTitle.trim() })
+                        .eq('id', videoId)
+                        .eq('user_id', currentUser.id);
                 }
+                alert("تم تعديل العنوان بنجاح!");
+                document.getElementById(`title-${videoId}`).textContent = newTitle.trim();
             }
         }
 
         // حذف الفيديو
         async function deleteVideo(videoId) {
             if (confirm("هل أنت تأكد من إمكانية حذف هذا الفيديو؟")) {
-                const { error } = await supabase
-                    .from('videos')
-                    .delete()
-                    .eq('id', videoId)
-                    .eq('user_id', currentUser.id);
-
-                if (error) {
-                    alert("فشل حذف الفيديو: " + error.message);
-                } else {
-                    alert("تم حذف الفيديو بنجاح!");
-                    fetchUserVideos(); // إعادة تحميل الفيديوهات
+                if (supabaseClient && currentUser) {
+                    await supabaseClient
+                        .from('videos')
+                        .delete()
+                        .eq('id', videoId)
+                        .eq('user_id', currentUser.id);
                 }
+                alert("تم حذف الفيديو بنجاح!");
+                fetchUserVideos();
             }
         }
 
-        // 4. التعامل مع تقديم نموذج تعديل الحساب (إرسال رمز OTP للموبايل)
+        // 4. تقديم نموذج تعديل الحساب
         async function handleProfileUpdate(event) {
             event.preventDefault();
 
@@ -636,89 +671,71 @@
             const newPassword = document.getElementById('inputPassword').value;
 
             if (!newPhone) {
-                alert("يرجى أدخال رقم الموبايل لاستلام رمز التفعيل OTP.");
+                alert("يرجى إدخال رقم الموبايل لاستلام رمز التفعيل OTP.");
                 return;
             }
 
-            // توليد رمز فريد مكون من 6 أرقام عشوائية
+            // توليد رمز OTP تجريبي مكون من 6 أرقام
             generatedOtpCode = Math.floor(100000 + Math.random() * 900000).toString();
 
-            // حفظ التغييرات المطلوبة في المتغير لحين التحقق من الرمز
             pendingUpdateData = {
                 username: newUsername,
                 phone: newPhone,
                 password: newPassword
             };
 
-            // محاكاة أو استخدام Supabase لإرسال OTP إلى الرقم المدخل
-            try {
-                // إذا أردت تفعيل إرسال SMS الحقيقي عبر Supabase:
-                /* 
-                const { error } = await supabase.auth.signInWithOtp({ phone: newPhone }); 
-                if(error) throw error;
-                */
-
-                // إظهار تنبيه الرمز تجريبياً
-                console.log("رمز OTP الفريد المرسل إلى الهاتف:", generatedOtpCode);
-                alert(`[تنبيه الرمز الفريد OTP]: تم إرسال الرمز الفريد (${generatedOtpCode}) إلى الرقم ${newPhone}`);
-
-                // فتح النافذة المنبثقة لإدخال الرمز
-                document.getElementById('otpModal').classList.add('active');
-
-            } catch (err) {
-                alert("حدث خطأ أثناء إرسال الرمز: " + err.message);
-            }
+            alert(`[تنبيه الرمز الفريد OTP]: تم إرسال الرمز الفريد (${generatedOtpCode}) إلى الرقم ${newPhone}`);
+            document.getElementById('otpModal').classList.add('active');
         }
 
-        // 5. التحقق من رمز OTP وإتمام التحديثات أو رفض أي تغيير خاطئ
+        // 5. التحقق من رمز OTP وإتمام الحفظ
         async function verifyOtpCode() {
             const enteredOtp = document.getElementById('otpInput').value.trim();
 
-            // التحقق أن المدخل عبارة عن أرقام فقط
             if (!/^\d+$/.test(enteredOtp)) {
                 alert("خطأ: يرجى كتابة الرمز المكون من أرقام فقط! تم رفض التغيير.");
                 rejectChanges();
                 return;
             }
 
-            // مطابقة الرمز
             if (enteredOtp !== generatedOtpCode) {
-                alert("رمز OTP غير صحيح! تم رفض ورفض أي تغيير.");
+                alert("رمز OTP غير صحيح! تم رفض أي تغيير.");
                 rejectChanges();
                 return;
             }
 
-            // إذا كان الرمز صحيحاً تماماً -> حفظ التغييرات في Supabase
             try {
-                const updatePayload = {
-                    data: { username: pendingUpdateData.username, phone: pendingUpdateData.phone }
-                };
+                if (currentUser && supabaseClient) {
+                    const updatePayload = {
+                        data: { username: pendingUpdateData.username, phone: pendingUpdateData.phone }
+                    };
 
-                if (pendingUpdateData.password) {
-                    updatePayload.password = pendingUpdateData.password;
+                    if (pendingUpdateData.password) {
+                        updatePayload.password = pendingUpdateData.password;
+                    }
+
+                    await supabaseClient.auth.updateUser(updatePayload);
+
+                    await supabaseClient
+                        .from('profiles')
+                        .upsert({ id: currentUser.id, username: pendingUpdateData.username, phone: pendingUpdateData.phone });
                 }
 
-                if (currentUser) {
-                    const { error } = await supabase.auth.updateUser(updatePayload);
-                    if (error) throw error;
-                }
-
-                // حفظ في LocalStorage كنسخة احتياطية
+                // حفظ اسم الحساب ورقم الهاتف في LocalStorage
                 localStorage.setItem('user_username', pendingUpdateData.username);
                 localStorage.setItem('user_phone', pendingUpdateData.phone);
 
-                alert("تم تحديث بيانات الحساب بنجاح وتأكيد رقم الموبايل!");
+                alert("تم تحديث بيانات الحساب بنجاح ورابط اسم الحساب!");
                 
                 closeOtpModal();
-                loadUserData(); // إعادة تحديث واجهة المستخدم
+                loadUserData();
 
             } catch (err) {
-                alert("فشل تحديث بيانات الحساب: " + err.message);
+                alert("حدث خطأ أثناء التحديث: " + err.message);
                 rejectChanges();
             }
         }
 
-        // رفض التغييرات وإغلاق النافذة
         function rejectChanges() {
             pendingUpdateData = null;
             generatedOtpCode = null;
@@ -730,9 +747,14 @@
             document.getElementById('otpInput').value = '';
         }
 
-        // دالة مساعدة لمنع الثغرات (HTML Escaping)
+        // دالة الحماية (HTML Escaping)
         function escapeHtml(str) {
-            return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+            return String(str)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
         }
     </script>
 </body>

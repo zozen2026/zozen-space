@@ -5,18 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Home - Orange Design</title>
     
-    <!-- التحقق الشامل والفوري من جلسة المستخدم المحلية والسحابية للتوجيه التلقائي -->
-    <script>
-        const savedUser = localStorage.getItem('user_username') || 
-                          localStorage.getItem('username') || 
-                          localStorage.getItem('user_email') || 
-                          localStorage.getItem('sb-lzvtnfdgynwczrkwlwhf-auth-token');
-        
-        if (savedUser) {
-            window.location.href = 'inndex.html';
-        }
-    </script>
-
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
     <!-- Supabase Library -->
@@ -286,7 +274,6 @@
             let globalPosts = JSON.parse(localStorage.getItem('all_published_videos') || '[]');
 
             if (globalPosts.length === 0) {
-                // عرض الرسالة بالثلاث لغات (إنجليزي، عربي، روسي) بشكل عمودي كما طلبت
                 grid.innerHTML = `
                     <div class="multi-lang-msg">
                         <span class="lang-en">No published videos available.</span>

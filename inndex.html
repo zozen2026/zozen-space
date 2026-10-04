@@ -32,7 +32,7 @@
             z-index: 2000;
             box-shadow: -2px 0 10px rgba(0,0,0,0.1);
             transition: 0.3s;
-        }
+        } 
         
         .sidebar a { 
             margin-bottom: 35px; 
@@ -57,6 +57,15 @@
             z-index: 500;
             box-shadow: 0 2px 10px rgba(0,0,0,0.05);
             transition: 0.3s;
+        }
+
+        /* تنسيق اسم الماركة (Zozen) في أعلى اليمين */
+        .brand-name {
+            font-size: 26px;
+            font-weight: bold;
+            color: orange;
+            letter-spacing: 1px;
+            user-select: none;
         }
 
         .search-box-wrapper {
@@ -132,10 +141,10 @@
         .lang-ar { direction: rtl; color: #555; }
         .lang-ru { direction: ltr; color: #666; }
 
-        /* التصميم المتجاوب للشاشات الصغيرة (الموبايل): الشريط بالأسفل والفيديوهات عمودية تحت بعضها */
+        /* التصميم المتجاوب للشاشات الصغيرة (الموبايل) */
         @media (max-width: 768px) {
             body {
-                padding-bottom: 80px; /* ترك مساحة في أسفل الصفحة حتى لا يغطي الشريط المحتوى */
+                padding-bottom: 80px;
             }
             .sidebar {
                 top: auto;
@@ -163,6 +172,9 @@
                 justify-content: space-between;
                 align-items: center;
             }
+            .brand-name {
+                font-size: 20px;
+            }
             .search-box-wrapper {
                 position: static;
                 transform: none;
@@ -179,7 +191,6 @@
                 padding: 6px 35px 6px 10px;
                 font-size: 13px;
             }
-            /* جعل الفيديوهات تظهر بعمود واحد (فيديو تحت فيديو) */
             .video-grid {
                 grid-template-columns: 1fr !important;
                 padding: 80px 15px 20px 15px;
@@ -191,13 +202,19 @@
         }
     </style>
     <script>
+        // التثبت المرن من وجود الجلسة لمنع الارتداد
         (function () {
+            const currentUser = localStorage.getItem('currentUser');
             const savedEmail = localStorage.getItem('user_email');
-            if (!savedEmail) {
+            const savedUsername = localStorage.getItem('user_username');
+
+            // إذا لم تكن أي بيانات مسجلة، يعاد التوجيه
+            if (!currentUser && !savedEmail && !savedUsername) {
                 window.location.replace('aaaa.html');
             }
         })();
 
+        // تطبيق لون الثيم المخصص
         (function () {
             const savedColor = localStorage.getItem('themeBgColor');
             if (savedColor) {
@@ -216,7 +233,9 @@
     </div>
 
     <div class="header-top">
-        <div class="center-content"></div>
+        <!-- كلمة Zozen في أعلى اليمين -->
+        <div class="brand-name">Zozen</div>
+
         <div class="search-box-wrapper">
             <form action="search.html" method="GET" class="search-box">
                 <button type="submit" style="background: none; border: none; padding: 0; cursor: pointer; color: inherit;">
@@ -234,6 +253,9 @@
         const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx6dnRuZmRneW53Y3pya3dsd2hmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkxNDIxMTEsImV4cCI6MjEwNDcxODExMX0.w2hNlJ4SszyMBkUVjr1qiWNTTPxHMHkM9YOFtVP-pVI";
 
         const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        
+        // مصفوفة عامة لحفظ الفيديوهات بعد تهيئتها
+        window.fetchedVideosList = [];
 
         window.addEventListener("DOMContentLoaded", () => {
             loadCloudVideos();
@@ -270,19 +292,59 @@
                 return;
             }
 
-            let htmlContent = '';
-            videos.forEach((post) => {
-                const videoSource = post.url || post.video_url || '';
-                const videoAuthor = post.author || post.username || "User";
-                const videoTitle = post.title || "Untitled";
+            // توحيد نمط البيانات لتتطابق تماماً مع v2.html
+            let parsedList = videos.map(post => {
+                return {
+                    url: post.url || post.video_url || '',
+                    title: post.title || 'بدون عنوان',
+                    userName: post.author || post.username || 'مستخدم',
+                    accountName: post.account_name || (post.author ? `@${post.author}` : '@user'),
+                    accountImg: post.user_img || post.account_img || 'https://via.placeholder.com/50/orange/white?text=User',
+                    category: post.category || 'عام',
+                    views: post.views || 0,
+                    likes: post.likes || 0,
+                    createdAt: post.created_at || new Date().toISOString()
+                };
+            });
 
+            // --- خوارزمية ترتيب واقتراح الفيديوهات الذكية (Recommendation Algorithm) ---
+            const userInterests = JSON.parse(localStorage.getItem('user_interests')) || {};
+
+            parsedList.sort((a, b) => {
+                let scoreA = 0;
+                let scoreB = 0;
+
+                // 1. نقاط المطابقة مع تصنيف الفيديوهات التي يفضلها المستخدم
+                scoreA += (userInterests[a.category] || 0) * 25;
+                scoreB += (userInterests[b.category] || 0) * 25;
+
+                // 2. نقاط المشاهدات والإعجابات
+                scoreA += (a.views || 0) * 1.2 + (a.likes || 0) * 2;
+                scoreB += (b.views || 0) * 1.2 + (b.likes || 0) * 2;
+
+                // 3. أولوية الفيديوهات المنشورة حديثاً (أقل من 3 أيام)
+                const isNewA = (new Date() - new Date(a.createdAt)) < (3 * 24 * 60 * 60 * 1000);
+                const isNewB = (new Date() - new Date(b.createdAt)) < (3 * 24 * 60 * 60 * 1000);
+                if (isNewA) scoreA += 15;
+                if (isNewB) scoreB += 15;
+
+                return scoreB - scoreA; // ترتيب تنازلي حسب أعلى النقاط
+            });
+
+            window.fetchedVideosList = parsedList;
+
+            // حفظ قائمة الفيديوهات في الذاكرة لتستفيد منها المقترحات في صفحة v2.html
+            localStorage.setItem('app_videos', JSON.stringify(window.fetchedVideosList));
+
+            let htmlContent = '';
+            window.fetchedVideosList.forEach((post, index) => {
                 htmlContent += `
-                    <div class="video-card" onclick='selectAndOpenVideo(${JSON.stringify(post)})'>
-                        <video class="video-thumb" src="${videoSource}#t=0.1" preload="metadata"></video>
+                    <div class="video-card" onclick="selectAndOpenVideoByIndex(${index})">
+                        <video class="video-thumb" src="${post.url}#t=0.1" preload="metadata"></video>
                         <div class="video-info-area">
-                            <span class="video-title">${videoTitle}</span>
+                            <span class="video-title">${post.title}</span>
                             <div class="card-meta">
-                                <i class="fas fa-user"></i> ${videoAuthor}
+                                <i class="fas fa-user"></i> ${post.userName}
                             </div>
                         </div>
                     </div>
@@ -292,9 +354,12 @@
             grid.innerHTML = htmlContent;
         }
 
-        function selectAndOpenVideo(postData) {
-            localStorage.setItem('selectedVideo', JSON.stringify(postData));
-            window.location.href = "v2.html";
+        function selectAndOpenVideoByIndex(index) {
+            const selectedVideo = window.fetchedVideosList[index];
+            if (selectedVideo) {
+                localStorage.setItem('selectedVideo', JSON.stringify(selectedVideo));
+                window.location.href = "v2.html";
+            }
         }
     </script>
 </body>

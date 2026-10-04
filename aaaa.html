@@ -1,11 +1,12 @@
 <!DOCTYPE html>
-<html lang="en" dir="ltr" id="htmlRoot">
+<html lang="ar" dir="rtl" id="htmlRoot">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sign Up - Orange Design</title>
+    <!-- مكتبة الأيقونات Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <!-- Supabase Library -->
+    <!-- مكتبة Supabase الرسمية -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
@@ -102,7 +103,7 @@
             appearance: none;
         }
 
-        /* ضبط أماكن الأيقونات والنصوص بناءً على الاتجاه */
+        /* تعديلات الاتجاه RTL و LTR */
         [dir="rtl"] .input-wrapper input, [dir="rtl"] .input-wrapper select {
             padding-right: 45px;
             padding-left: 15px;
@@ -159,6 +160,30 @@
             box-shadow: 0 8px 25px rgba(255, 102, 0, 0.35);
         }
 
+        .signup-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        .login-link-container {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .login-link-container a {
+            color: var(--accent-color);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+
+        .login-link-container a:hover {
+            text-decoration: underline;
+            color: #e55c00;
+        }
+
         .error-msg {
             color: #d93838;
             font-size: 13px;
@@ -179,28 +204,23 @@
             <div class="icon-box">
                 <i class="fas fa-video"></i>
             </div>
-            <h2 id="uiTitle">Create New Account</h2>
-            <p id="uiSubTitle">Your Personal Video Library</p>
+            <h2 id="uiTitle">إنشاء حساب جديد</h2>
+            <p id="uiSubTitle">مكتبة الفيديوهات الخاصة بك</p>
         </div>
 
         <div id="errorMsg" class="error-msg"></div>
         
         <form id="accountForm">
-            <!-- اختيار اللغة بالترتيب المطلوبة -->
+            <!-- اختيار اللغة -->
             <div class="input-group">
-                <label id="lblLanguage">Language</label>
+                <label id="lblLanguage">اللغة</label>
                 <div class="input-wrapper">
                     <i class="fas fa-globe"></i>
                     <select id="languageSelect" onchange="changeLanguage(this.value)">
-                        <!-- 1. أمريكا -->
-                        <option value="en-US" selected>English (United States)</option>
-                        <!-- 2. بريطانيا -->
+                        <option value="ar" selected>العربية</option>
+                        <option value="en-US">English (United States)</option>
                         <option value="en-GB">English (United Kingdom)</option>
-                        <!-- 3. عربي -->
-                        <option value="ar">العربية</option>
-                        <!-- 4. روسي -->
                         <option value="ru">Русский</option>
-                        <!-- 5. باقي اللغات -->
                         <option value="hi">हिन्दी</option>
                         <option value="es">Español</option>
                         <option value="fr">Français</option>
@@ -218,45 +238,51 @@
                 </div>
             </div>
 
-            <!-- 1. اسم المستخدم (مع شرط @) -->
+            <!-- 1. اسم المستخدم (username) -->
             <div class="input-group">
-                <label id="lblUsername">Username</label>
+                <label id="lblUsername">اسم المستخدم</label>
                 <div class="input-wrapper">
                     <i class="fas fa-at"></i>
-                    <input type="text" id="username" placeholder="@username" required>
+                    <input type="text" id="username" placeholder="@اسم_المستخدم" required>
                 </div>
             </div>
 
-            <!-- 2. اسم الحساب -->
+            <!-- 2. اسم الحساب (account_name) -->
             <div class="input-group">
-                <label id="lblAccountName">Account Name</label>
+                <label id="lblAccountName">اسم الحساب</label>
                 <div class="input-wrapper">
                     <i class="fas fa-user"></i>
-                    <input type="text" id="accountName" placeholder="Display Name" required>
+                    <input type="text" id="accountName" placeholder="الاسم الظاهر" required>
                 </div>
             </div>
             
-            <!-- 3. مفتاح الدخول (كلمة السر) -->
+            <!-- 3. مفتاح الدخول (access_key) -->
             <div class="input-group">
-                <label id="lblPassword">Password</label>
+                <label id="lblPassword">مفتاح الدخول</label>
                 <div class="input-wrapper">
                     <i class="fas fa-lock"></i>
                     <input type="password" id="password" placeholder="••••••••" required>
                 </div>
             </div>
 
-            <button type="submit" class="signup-btn" id="btnSubmit">Get Started</button>
+            <button type="submit" class="signup-btn" id="btnSubmit">بدء الاستخدام</button>
+
+            <!-- رابط الانتقال لصفحة aa.html -->
+            <div class="login-link-container">
+                <a href="aa.html" id="linkLogin">هل عندك حساب؟ سجل دخول هنا!</a>
+            </div>
         </form>
     </div>
 
     <script>
-        // إعدادات اتصال Supabase
+        // إعدادات اتصال Supabase الخاصة بمشروعك
         const SUPABASE_URL = "https://lzvtnfdgynwczrkwlwhf.supabase.co";
         const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx6dnRuZmRneW53Y3pya3dsd2hmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkxNDIxMTEsImV4cCI6MjEwNDcxODExMX0.w2hNlJ4SszyMBkUVjr1qiWNTTPxHMHkM9YOFtVP-pVI";
 
-        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        // إنشاء عميل Supabase
+        const supabaseClient = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
 
-        // قاموس الترجمات الخاص بكل لغة
+        // القاموس المترجم للغات
         const translations = {
             "en-US": {
                 title: "Create New Account",
@@ -264,11 +290,12 @@
                 langLabel: "Language",
                 userLabel: "Username",
                 accLabel: "Account Name",
-                passLabel: "Password",
+                passLabel: "Access Key",
                 btnText: "Get Started",
                 placeholderUser: "@username",
                 placeholderAcc: "Display Name",
-                errAt: "Username must start with @ character"
+                errAt: "Username must start with @ character",
+                loginLink: "Already have an account? Log in here!"
             },
             "en-GB": {
                 title: "Create New Account",
@@ -276,11 +303,12 @@
                 langLabel: "Language",
                 userLabel: "Username",
                 accLabel: "Account Name",
-                passLabel: "Password",
+                passLabel: "Access Key",
                 btnText: "Get Started",
                 placeholderUser: "@username",
                 placeholderAcc: "Display Name",
-                errAt: "Username must start with @ character"
+                errAt: "Username must start with @ character",
+                loginLink: "Already have an account? Log in here!"
             },
             ar: {
                 title: "إنشاء حساب جديد",
@@ -292,7 +320,8 @@
                 btnText: "بدء الاستخدام",
                 placeholderUser: "@اسم_المستخدم",
                 placeholderAcc: "الاسم الظاهر",
-                errAt: "يجب أن يبدأ اسم المستخدم بحرف @ إجبارياً"
+                errAt: "يجب أن يبدأ اسم المستخدم بحرف @ إجبارياً",
+                loginLink: "هل عندك حساب؟ سجل دخول هنا!"
             },
             ru: {
                 title: "Создать аккаунт",
@@ -300,11 +329,12 @@
                 langLabel: "Язык",
                 userLabel: "Имя пользователя",
                 accLabel: "Отображаемое имя",
-                passLabel: "Пароль",
+                passLabel: "Ключ доступа",
                 btnText: "Начать",
                 placeholderUser: "@имя_пользователя",
                 placeholderAcc: "Отображаемое имя",
-                errAt: "Имя пользователя должно начинаться с символа @"
+                errAt: "Имя пользователя должно начинаться с символа @",
+                loginLink: "Уже есть аккаунт? Войдите здесь!"
             },
             hi: {
                 title: "नया खाता बनाएं",
@@ -312,11 +342,12 @@
                 langLabel: "भाषा",
                 userLabel: "उपयोगकर्ता नाम",
                 accLabel: "खाते का नाम",
-                passLabel: "पासवर्ड",
+                passLabel: "एक्सेस कुंजी",
                 btnText: "शुरू करें",
                 placeholderUser: "@उपयोगकर्ता",
                 placeholderAcc: "प्रदर्शित नाम",
-                errAt: "उपयोगकर्ता नाम @ से शुरू होना अनिवार्य है"
+                errAt: "उपयोगकर्ता नाम @ से शुरू होना अनिवार्य है",
+                loginLink: "क्या आपके पास पहले से खाता है? यहाँ लॉगिन करें!"
             },
             it: {
                 title: "Crea nuovo account",
@@ -324,11 +355,12 @@
                 langLabel: "Lingua",
                 userLabel: "Nome utente",
                 accLabel: "Nome account",
-                passLabel: "Password",
+                passLabel: "Chiave di accesso",
                 btnText: "Inizia",
                 placeholderUser: "@nome_utente",
                 placeholderAcc: "Nome visualizzato",
-                errAt: "Il nome utente deve iniziare con @"
+                errAt: "Il nome utente deve iniziare con @",
+                loginLink: "Hai già un account? Accedi qui!"
             },
             es: {
                 title: "Crear nueva cuenta",
@@ -336,11 +368,12 @@
                 langLabel: "Idioma",
                 userLabel: "Nombre de usuario",
                 accLabel: "Nombre de la cuenta",
-                passLabel: "Contraseña",
+                passLabel: "Clave de acceso",
                 btnText: "Comenzar",
                 placeholderUser: "@usuario",
                 placeholderAcc: "Nombre visible",
-                errAt: "El nombre de usuario debe comenzar con @"
+                errAt: "El nombre de usuario debe comenzar con @",
+                loginLink: "¿Ya tienes una cuenta? ¡Inicia sesión aquí!"
             },
             fr: {
                 title: "Créer un compte",
@@ -348,11 +381,12 @@
                 langLabel: "Langue",
                 userLabel: "Nom d'utilisateur",
                 accLabel: "Nom du compte",
-                passLabel: "Mot de passe",
+                passLabel: "Clé d'accès",
                 btnText: "Commencer",
                 placeholderUser: "@nom_utilisateur",
                 placeholderAcc: "Nom d'affichage",
-                errAt: "Le nom d'utilisateur doit commencer par @"
+                errAt: "Le nom d'utilisateur doit commencer par @",
+                loginLink: "Vous avez déjà un compte ? Connectez-vous ici !"
             },
             de: {
                 title: "Neues Konto erstellen",
@@ -360,11 +394,12 @@
                 langLabel: "Sprache",
                 userLabel: "Benutzername",
                 accLabel: "Kontiname",
-                passLabel: "Passwort",
+                passLabel: "Zugangsschlüssel",
                 btnText: "Starten",
                 placeholderUser: "@benutzername",
                 placeholderAcc: "Anzeigename",
-                errAt: "Der Benutzername muss mit @ beginnen"
+                errAt: "Der Benutzername muss mit @ beginnen",
+                loginLink: "Haben Sie bereits ein Konto? Hier anmelden!"
             },
             tr: {
                 title: "Yeni Hesap Oluştur",
@@ -372,28 +407,23 @@
                 langLabel: "Dil",
                 userLabel: "Kullanıcı Adı",
                 accLabel: "Hesap Adı",
-                passLabel: "Şifre",
+                passLabel: "Erişim Anahtarı",
                 btnText: "Başla",
                 placeholderUser: "@kullanici_adi",
                 placeholderAcc: "Görünen Ad",
-                errAt: "Kullanıcı adı @ ile başlamalıdır"
+                errAt: "Kullanıcı adı @ ile başlamalıdır",
+                loginLink: "Zaten bir hesabınız var mı? Burada giriş yapın!"
             }
         };
 
-        // دالة تغيير اللغة والاتجاه والنصوص بالكامل
+        // تغيير اللغة والاتجاه تلقائياً
         function changeLanguage(langCode) {
             const htmlRoot = document.getElementById('htmlRoot');
             const rtlLangs = ['ar', 'fa', 'ur'];
 
-            // تغيير الاتجاه (RTL/LTR)
-            if (rtlLangs.includes(langCode)) {
-                htmlRoot.setAttribute('dir', 'rtl');
-            } else {
-                htmlRoot.setAttribute('dir', 'ltr');
-            }
+            htmlRoot.setAttribute('dir', rtlLangs.includes(langCode) ? 'rtl' : 'ltr');
             htmlRoot.setAttribute('lang', langCode);
 
-            // جلب الترجمة المطلوبة أو استخدام الإنجليزية كافتراضي
             const t = translations[langCode] || translations['en-US'];
 
             document.getElementById('uiTitle').innerText = t.title;
@@ -403,18 +433,17 @@
             document.getElementById('lblAccountName').innerText = t.accLabel;
             document.getElementById('lblPassword').innerText = t.passLabel;
             document.getElementById('btnSubmit').innerText = t.btnText;
+            document.getElementById('linkLogin').innerText = t.loginLink || "هل عندك حساب؟ سجل دخول هنا!";
             
-            // تغيير النصوص التوضيحية داخل المدخلات بلغة الصفحة
             document.getElementById('username').placeholder = t.placeholderUser;
             document.getElementById('accountName').placeholder = t.placeholderAcc;
         }
 
-        // تشغيل اللغة الافتراضية عند تحميل الصفحة
         window.addEventListener('DOMContentLoaded', () => {
             changeLanguage(document.getElementById('languageSelect').value);
         });
 
-        // معالجة نموذج التسجيل
+        // التعامل مع تقديم النموذج والإرسال لقاعدة البيانات
         document.getElementById('accountForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
@@ -423,73 +452,55 @@
             const accountName = document.getElementById('accountName').value.trim();
             const password = document.getElementById('password').value.trim();
             const errorDiv = document.getElementById('errorMsg');
+            const btnSubmit = document.getElementById('btnSubmit');
             
             const t = translations[selectedLang] || translations['en-US'];
             errorDiv.style.display = 'none';
 
-            // الشرط الإجباري: التحقق من أن اسم المستخدم يبدأ بـ @
+            // 1. التثبت من شرط البدء بـ @
             if (!username.startsWith('@')) {
                 errorDiv.innerText = t.errAt;
                 errorDiv.style.display = 'block';
                 return;
             }
 
-            // توليد رابط الصورة الرمزية التلقائية بناءً على الاسم
-            const userAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(accountName)}&background=ff6600&color=fff`;
+            // تعطيل الزر لمنع الضغط المكرر أثناء الإرسال
+            btnSubmit.disabled = true;
 
-            // 1. التخزين المحلي الشامل في LocalStorage
+            // 2. حفظ الحساب في LocalStorage للسرعة والاستجابة
             const currentUserData = {
                 username: username,
                 accountName: accountName,
                 password: password,
-                language: selectedLang,
-                avatar: userAvatar
+                language: selectedLang
             };
-
             localStorage.setItem('currentUser', JSON.stringify(currentUserData));
-            localStorage.setItem('user_username', username);
-            localStorage.setItem('user_account_name', accountName);
-            localStorage.setItem('user_password', password);
-            localStorage.setItem('user_language', selectedLang);
 
-            // 2. التخزين السحابي عبر Supabase
-            try {
-                const { error: authError } = await supabaseClient.auth.signUp({
-                    email: username.replace('@', '') + "@orange.local",
-                    password: password
-                });
+            // 3. إرسال البيانات مباشرة للجدول accounts بالخادم وفق أسماء الأعمدة الدقيقة:
+            // (username, account_name, access_key)
+            if (supabaseClient) {
+                try {
+                    const { data, error } = await supabaseClient
+                        .from('accounts')
+                        .insert([
+                            { 
+                                username: username, 
+                                account_name: accountName, 
+                                access_key: password 
+                            }
+                        ]);
 
-                if (authError) {
-                    console.log("Auth note:", authError.message);
+                    if (error) {
+                        console.error("Supabase Insert Error:", error.message);
+                    } else {
+                        console.log("Success Insert into Supabase:", data);
+                    }
+                } catch (err) {
+                    console.error("Connection Error:", err);
                 }
-
-                // إدخال البيانات في جدول accounts المخصص
-                const { error: dbError } = await supabaseClient
-                    .from('accounts')
-                    .insert([
-                        { 
-                            username: username, 
-                            account_name: accountName, 
-                            password: password,
-                            language: selectedLang
-                        }
-                    ]);
-
-                if (dbError) {
-                    console.error("خطأ في إدخال الجدول:", dbError.message);
-                    errorDiv.innerText = dbError.message;
-                    errorDiv.style.display = 'block';
-                    return;
-                }
-
-            } catch (err) {
-                console.log("Cloud sync note:", err);
-                errorDiv.innerText = err.message;
-                errorDiv.style.display = 'block';
-                return;
             }
 
-            // الانتقال المباشر إلى inndex.html بعد النجاح التام
+            // 4. التحويل المضمون والفوري إلى ملف inndex.html
             window.location.href = 'inndex.html';
         });
     </script>

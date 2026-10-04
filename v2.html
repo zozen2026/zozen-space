@@ -19,11 +19,14 @@
             measurementId: "G-65VEXWQZWV"
         };
 
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        
-        window.db = db;
-        window.firebaseTools = { doc, getDoc, updateDoc, increment, setDoc };
+        try {
+            const app = initializeApp(firebaseConfig);
+            const db = getFirestore(app);
+            window.db = db;
+            window.firebaseTools = { doc, getDoc, updateDoc, increment, setDoc };
+        } catch (e) {
+            console.error("خطأ في تهيئة Firebase:", e);
+        }
         window.dispatchEvent(new Event('firebase-loaded'));
     </script>
 
@@ -43,9 +46,11 @@
         .suggested-video-title { font-weight: bold; font-size: 14px; color: #333; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .suggested-meta { font-size: 12px; color: orange; margin-top: 5px; }
         .main-player-area { flex-grow: 1; display: flex; flex-direction: column; gap: 20px; }
-        .video-box { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); }
-        .main-video { width: 100%; aspect-ratio: 16/9; background: #000; border-radius: 10px; object-fit: contain; }
-        .video-details { margin-top: 20px; display: flex; flex-direction: column; gap: 10px; }
+        
+        .video-box { background: transparent; padding: 0; border-radius: 0; box-shadow: none; }
+        .main-video { width: 100%; aspect-ratio: 16/9; background: #000; border-radius: 12px; object-fit: contain; border: none; outline: none; }
+        
+        .video-details { margin-top: 15px; background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); display: flex; flex-direction: column; gap: 10px; }
         .details-header { display: flex; justify-content: space-between; align-items: flex-start; }
         .title-and-views { display: flex; flex-direction: column; gap: 5px; }
         .video-title { font-size: 22px; font-weight: bold; color: #333; }
@@ -80,14 +85,14 @@
 <body>
 
     <div class="sidebar">
-        <a href="index.html"><i class="fas fa-house"></i></a>
+        <a href="inndex.html"><i class="fas fa-house"></i></a>
         <a href="profile2.html"><i class="fas fa-circle-user"></i></a>
         <a href="bell2.html"><i class="fas fa-bell"></i></a>
         <a href="create2.html"><i class="fas fa-external-link-alt"></i></a>
     </div>
 
     <div class="header-top">
-        <img src="file:///C:/Users/USER/Desktop/مجلد جديد/.png-image_16162666.png" style="width: 40px; height: 40px; object-fit: contain;" alt="Logo">
+        <div style="font-size:24px; font-weight:bold; color:orange;">Zozen</div>
     </div>
 
     <div class="player-container">
@@ -103,7 +108,7 @@
         <div class="main-player-area">
             
             <div class="video-box">
-                <video id="mainVideoPlayer" class="main-video" controls autoplay src="" ontimeupdate="checkViewTime()"></video>
+                <video id="mainVideoPlayer" class="main-video" controls autoplay src="" ontimeupdate="checkViewProgress()" onended="checkViewProgress(true)"></video>
                 
                 <div class="video-details">
                     <div class="details-header">
@@ -148,57 +153,41 @@
     </div>
 
     <script>
-    // ----------------------------------------------------
-    // نظام الفلترة الموسع للكلمات النابية وغير الأخلاقية
-    // ----------------------------------------------------
-    const FORBIDDEN_WORDS = [
-        // المستوى 1: السباب الخفيف والمتوسط
-        "غبي", "احمق", "أحمق", "حمار", "كلب", "حيوان", "فاشل", "تافه", "حقير", 
-        "وقح", "سافل", "منحط", "قذر", "زبالة", "خنزير", "لعنة", "اللعنة", "يا جحش",
-        
-        // المستوى 2: الألفاظ الخرساء والسباب الشديد
-        "خرا", "خراء", "خرية", "زق", "طيز", "زب", "شرموط", "شرموطة", "قحبة", 
-        "عرص", "ديوث", "كس", "منيوك", "كحبة", "مكسكس", "طيزك", "كسك", "زبك",
-        
-        // المستوى 3: الكفر والإساءة الدينية
-        "يلعن رب", "يلعن دين", "سب الرب", "سب الدين", "كفر", "يلعن الله", "كافر"
-    ];
-
-    function checkBadWords(text) {
-        if (!text) return false;
-        
-        // إزالة الحركات، التشكيل، والمسافات المكررة لضمان الدقة
-        let cleanText = text.toLowerCase()
-            .replace(/[\u064B-\u065F]/g, "") // إزالة التشكيل
-            .replace(/[^\w\sأ-ي]/g, " ")      // إزالة الرموز والترقيم
-            .replace(/\s+/g, " ");
-
-        for (let word of FORBIDDEN_WORDS) {
-            let normalizedWord = word.toLowerCase().replace(/[\u064B-\u065F]/g, "");
-            let regex = new RegExp(`(?:^|\\s)${normalizedWord}(?:$|\\s)`, 'i');
-            
-            if (regex.test(cleanText) || cleanText.includes(normalizedWord)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
     let currentVideo = null;
     let viewCountedForCurrentSession = false;
+    window.suggestedVideosList = [];
 
-    window.addEventListener('firebase-loaded', () => {
+    function generateDocId(url) {
+        if (!url) return 'default_id';
+        return encodeURIComponent(url).replace(/[^a-zA-Z0-9]/g, '_').substring(0, 100);
+    }
+
+    let initialized = false;
+    function safeInit() {
+        if (initialized) return;
+        initialized = true;
         initPlayer();
+    }
+
+    window.addEventListener('firebase-loaded', safeInit);
+    document.addEventListener('DOMContentLoaded', () => {
+        setTimeout(safeInit, 300);
     });
 
     async function initPlayer() {
         let selectedVideoFromStorage = JSON.parse(localStorage.getItem('selectedVideo'));
         
-        if (selectedVideoFromStorage && selectedVideoFromStorage.url) {
-            currentVideo = selectedVideoFromStorage;
-            
+        if (!selectedVideoFromStorage || !selectedVideoFromStorage.url) {
+            document.getElementById('mainVideoTitle').innerText = "يرجى اختيار فيديو من الصفحة الرئيسية (inndex.html) لتشغيله.";
+            document.getElementById('suggestionsGrid').innerHTML = "<p style='color: #999; font-size: 14px;'>اختر فيديو من الرئيسية أولاً.</p>";
+            return;
+        }
+
+        currentVideo = selectedVideoFromStorage;
+        
+        if (window.firebaseTools && window.db && currentVideo.url) {
             try {
-                const videoDocId = btoa(currentVideo.url).replace(/[^a-zA-Z0-9]/g, '');
+                const videoDocId = generateDocId(currentVideo.url);
                 const docRef = window.firebaseTools.doc(window.db, "videos", videoDocId);
                 const docSnap = await window.firebaseTools.getDoc(docRef);
                 
@@ -208,33 +197,29 @@
                     await window.firebaseTools.setDoc(docRef, {
                         url: currentVideo.url,
                         title: currentVideo.title || '',
+                        category: currentVideo.category || 'عام',
                         views: parseInt(currentVideo.views) || 0
                     });
                 }
             } catch (e) {
-                console.error("خطأ في الاتصال بالسحابة لجلب المشاهدات:", e);
+                console.error("خطأ في جلب المشاهدات السحابية:", e);
             }
         }
 
         viewCountedForCurrentSession = false;
-        
-        if (currentVideo) {
-            renderMainVideo(currentVideo);
-        } else {
-            document.getElementById('mainVideoTitle').innerText = "لم يتم اختيار فيديو لتشغيله.";
-        }
-
+        renderMainVideo(currentVideo);
+        recordUserInterest(currentVideo.category || 'عام');
         loadRecommendations();
-    }
-
-    function goToProfile(accountName, userName) {
-        window.location.href = `jndfsl.html?account=${encodeURIComponent(accountName)}&username=${encodeURIComponent(userName)}`;
     }
 
     function renderMainVideo(video) {
         const player = document.getElementById('mainVideoPlayer');
-        player.src = video.url;
-        player.play();
+        
+        if (video && video.url) {
+            player.src = video.url;
+            player.load();
+            player.play().catch(e => console.log("التشغيل يتطلب تفاعل المستخدم"));
+        }
 
         document.getElementById('mainVideoTitle').innerText = video.title || 'بدون عنوان';
         document.getElementById('mainVideoViews').innerText = video.views || 0;
@@ -245,14 +230,14 @@
         document.getElementById('mainAccountImg').src = accountImgUrl;
 
         document.getElementById('accountLinkContainer').onclick = function() {
-            goToProfile(video.accountName || '', video.userName || 'مستخدم');
+            window.location.href = `jndfsl.html?account=${encodeURIComponent(video.accountName)}&username=${encodeURIComponent(video.userName)}`;
         };
 
         const likeBtn = document.getElementById('likeButton');
         const currentUserData = JSON.parse(localStorage.getItem('currentUser')) || {};
         const currentViewer = currentUserData.userName || 'مستخدم'; 
         
-        const videoLikesKey = `likes_${btoa(video.url)}`;
+        const videoLikesKey = `likes_${generateDocId(video.url)}`;
         let likedUsers = JSON.parse(localStorage.getItem(videoLikesKey)) || [];
 
         if (likedUsers.includes(currentViewer)) {
@@ -265,36 +250,47 @@
         loadComments(video.url);
     }
 
-    async function checkViewTime() {
+    // --- خوارزمية احتساب المشاهدة (50% أو أكثر أو عند النهاية) ---
+    async function checkViewProgress(isEnded = false) {
         const player = document.getElementById('mainVideoPlayer');
-        if (!currentVideo || viewCountedForCurrentSession) return;
+        if (!currentVideo || viewCountedForCurrentSession || !player.duration) return;
 
-        const deviceViewKey = `cloud_viewed_${btoa(currentVideo.url)}`;
-        const hasDeviceViewedBefore = localStorage.getItem(deviceViewKey);
+        const watchRatio = player.currentTime / player.duration;
 
-        if (player.currentTime >= 4 && !hasDeviceViewedBefore) {
+        // الاحتساب يتم إذا شوهد نصف الفيديو (50%) أو أغلبه أو نهايته
+        if (watchRatio >= 0.5 || isEnded) {
             viewCountedForCurrentSession = true;
-            localStorage.setItem(deviceViewKey, 'true');
 
             currentVideo.views = (parseInt(currentVideo.views) || 0) + 1;
             document.getElementById('mainVideoViews').innerText = currentVideo.views;
 
-            try {
-                const videoDocId = btoa(currentVideo.url).replace(/[^a-zA-Z0-9]/g, '');
-                const docRef = window.firebaseTools.doc(window.db, "videos", videoDocId);
-                
-                await window.firebaseTools.updateDoc(docRef, {
-                    views: window.firebaseTools.increment(1)
-                });
-            } catch (e) {
-                console.error("فشل التحديث السحابي للمشاهدة:", e);
+            // تحديث السحابة Firebase
+            if (window.firebaseTools && window.db) {
+                try {
+                    const videoDocId = generateDocId(currentVideo.url);
+                    const docRef = window.firebaseTools.doc(window.db, "videos", videoDocId);
+                    await window.firebaseTools.updateDoc(docRef, {
+                        views: window.firebaseTools.increment(1)
+                    });
+                } catch (e) {
+                    console.error("فشل التحديث السحابي للمشاهدة:", e);
+                }
             }
 
+            // تحديث الذاكرة المحلية
             localStorage.setItem('selectedVideo', JSON.stringify(currentVideo));
             let allVideos = JSON.parse(localStorage.getItem('app_videos')) || [];
             allVideos = allVideos.map(v => v.url === currentVideo.url ? { ...v, views: currentVideo.views } : v);
             localStorage.setItem('app_videos', JSON.stringify(allVideos));
         }
+    }
+
+    // تسجيل اهتمام المستخدم بالتصنيف (لنظام اقتراحات يوتيوب)
+    function recordUserInterest(category) {
+        if (!category) return;
+        let interests = JSON.parse(localStorage.getItem('user_interests')) || {};
+        interests[category] = (interests[category] || 0) + 1;
+        localStorage.setItem('user_interests', JSON.stringify(interests));
     }
 
     function toggleLike() {
@@ -307,7 +303,7 @@
         const currentUserData = JSON.parse(localStorage.getItem('currentUser')) || {};
         const currentViewer = currentUserData.userName || 'مستخدم';
         
-        const videoLikesKey = `likes_${btoa(currentVideo.url)}`;
+        const videoLikesKey = `likes_${generateDocId(currentVideo.url)}`;
         let likedUsers = JSON.parse(localStorage.getItem(videoLikesKey)) || [];
 
         if (likeBtn.classList.contains('liked')) {
@@ -320,6 +316,7 @@
             if (!likedUsers.includes(currentViewer)) {
                 likedUsers.push(currentViewer);
             }
+            recordUserInterest(currentVideo.category || 'عام'); // التفاعل بالإعجاب يزيد الاهتمام
         }
         
         likeCountSpan.innerText = currentLikes;
@@ -336,17 +333,28 @@
     function loadRecommendations() {
         const suggestionsGrid = document.getElementById('suggestionsGrid');
         const allVideos = JSON.parse(localStorage.getItem('app_videos')) || [];
-        const otherVideos = allVideos.filter(v => v.url !== (currentVideo ? currentVideo.url : ''));
+        const userInterests = JSON.parse(localStorage.getItem('user_interests')) || {};
 
-        if (otherVideos.length === 0) {
+        let filtered = allVideos.filter(v => v.url !== (currentVideo ? currentVideo.url : ''));
+
+        // ترتيب المقترحات الجانبية حسب تصنيف الفيديو المفتوح واهتمامات المتابع
+        filtered.sort((a, b) => {
+            let scoreA = (a.category === currentVideo.category ? 20 : 0) + (userInterests[a.category] || 0) + (a.views || 0);
+            let scoreB = (b.category === currentVideo.category ? 20 : 0) + (userInterests[b.category] || 0) + (b.views || 0);
+            return scoreB - scoreA;
+        });
+
+        window.suggestedVideosList = filtered;
+
+        if (window.suggestedVideosList.length === 0) {
             suggestionsGrid.innerHTML = "<p style='color: #999; font-size: 14px;'>لا توجد مقترحات أخرى حالياً.</p>";
             return;
         }
 
-        suggestionsGrid.innerHTML = otherVideos.map((v) => {
+        suggestionsGrid.innerHTML = window.suggestedVideosList.map((v, index) => {
             return `
-                <div class="suggested-card" onclick='playSuggestedVideo(${JSON.stringify(v).replace(/'/g, "&#39;")})'>
-                    <video class="suggested-thumb" src="${v.url}"></video>
+                <div class="suggested-card" onclick="playSuggestedVideoByIndex(${index})">
+                    <video class="suggested-thumb" src="${v.url}#t=0.5" preload="metadata"></video>
                     <div class="suggested-info">
                         <span class="suggested-video-title">${v.title || 'بدون عنوان'}</span>
                         <span class="suggested-meta">
@@ -358,11 +366,15 @@
         }).join('');
     }
 
-    function playSuggestedVideo(videoObject) {
+    function playSuggestedVideoByIndex(index) {
+        const videoObject = window.suggestedVideosList[index];
+        if (!videoObject) return;
+        
         currentVideo = videoObject;
         viewCountedForCurrentSession = false;
         localStorage.setItem('selectedVideo', JSON.stringify(videoObject));
         renderMainVideo(videoObject);
+        recordUserInterest(currentVideo.category || 'عام');
         loadRecommendations();
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
@@ -381,10 +393,10 @@
 
         commentsList.innerHTML = videoComments.slice().reverse().map(c => `
             <div class="comment-card">
-                <img class="comment-user-img" src="${c.userImg}" alt="avatar" onclick="goToProfile('${c.accountName}', '${c.userName}')">
+                <img class="comment-user-img" src="${c.userImg}" alt="avatar">
                 <div class="comment-content">
-                    <div class="comment-user-meta" onclick="goToProfile('${c.accountName}', '${c.userName}')">
-                        ${c.userName} <span style="color:#777;">(${c.accountName})</span> <span>منذ قليل</span>
+                    <div class="comment-user-meta">
+                        ${c.userName} <span style="color:#777;">(${c.accountName})</span>
                     </div>
                     <div class="comment-text-body">${c.text}</div>
                 </div>
@@ -394,19 +406,8 @@
 
     function addNewComment() {
         const input = document.getElementById('newCommentInput');
-        const errorMsg = document.getElementById('commentErrorMsg');
         const commentText = input.value.trim();
-        
-        errorMsg.style.display = 'none';
-        
         if (!commentText || !currentVideo) return;
-
-        // تطبيق الفلترة الذكية للكلمات غير الأخلاقية
-        if (checkBadWords(commentText)) {
-            errorMsg.innerText = "عذراً، يحتوي التعليق على كلمات غير لائقة أو ألفاظ محظورة.";
-            errorMsg.style.display = 'block';
-            return;
-        }
 
         const currentUserData = JSON.parse(localStorage.getItem('currentUser')) || {};
 
@@ -414,14 +415,11 @@
             text: commentText,
             userName: currentUserData.userName || "مستخدم مسجل",
             accountName: currentUserData.accountName || "@user",
-            userImg: currentUserData.userImg || "https://via.placeholder.com/50/orange/white?text=Me",
-            timestamp: new Date().getTime()
+            userImg: currentUserData.userImg || "https://via.placeholder.com/50/orange/white?text=Me"
         };
 
         const allComments = JSON.parse(localStorage.getItem('app_comments')) || {};
-        if (!allComments[currentVideo.url]) {
-            allComments[currentVideo.url] = [];
-        }
+        if (!allComments[currentVideo.url]) allComments[currentVideo.url] = [];
         
         allComments[currentVideo.url].push(newComment);
         localStorage.setItem('app_comments', JSON.stringify(allComments));
@@ -429,6 +427,6 @@
         input.value = '';
         loadComments(currentVideo.url);
     }
-</script>
+    </script>
 </body>
 </html>
