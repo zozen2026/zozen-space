@@ -3,19 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>الشريط الجانبي</title>
+    <title>الشريط الجانبي والبروفايل</title>
     
+    <!-- مكتبة الأيقونات -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
-        /* التعديل الجديد: تغيير خلفية الصفحة بالكامل لتصبح مريحة للعين */
+        /* تنسيق خلفية الصفحة والشاشة بالكامل */
         body {
-            background-color: #ffb700; /* رمادي داكن مريح جداً */
+            background-color: #ffb700; /* خلفية صفراء زاهية مريحة */
             margin: 0;
             padding: 0;
             font-family: Arial, sans-serif;
+            position: relative; /* ضروري جداً لتموضع العناصر بداخله نسبياً */
+            min-height: 100vh;
+            overflow: hidden;
         }
 
+        /* تنسيق الشريط الجانبي */
         .sidebar { 
             position: fixed; 
             right: 0; 
@@ -28,7 +33,7 @@
             align-items: center; 
             padding-top: 30px; 
             z-index: 2000;
-            box-shadow: -2px 0 10px rgba(0,0,0,0.3); /* تم تزييد الظل ليناسب الخلفية المظلمة */
+            box-shadow: -2px 0 10px rgba(0,0,0,0.3);
         }
         
         .sidebar a { 
@@ -41,6 +46,7 @@
             align-items: center;
             justify-content: center;
         }
+        
         .sidebar a:hover { 
             transform: scale(1.2); 
             color: #ff9900; 
@@ -56,10 +62,33 @@
             align-items: center;
             justify-content: center;
         }
+
+        /* التحكم بالأيقونة الدائرية في منتصف الصفحة تماماً */
+        .absolute-center-profile {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%); /* التوسيط الهندسي الدقيق */
+            z-index: 9999;
+            display: block;
+            transition: transform 0.3s ease, filter 0.3s ease;
+        }
+
+        /* تأثير تفاعلي عند تمرير الماوس على أيقونة المنتصف */
+        .absolute-center-profile:hover {
+            transform: translate(-50%, -50%) scale(1.1);
+            filter: drop-shadow(0 0 20px rgba(185, 122, 87, 0.5));
+        }
+        
+        /* عند الضغط الفعلي على الأيقونة */
+        .absolute-center-profile:active {
+            transform: translate(-50%, -50%) scale(0.95);
+        }
     </style>
 </head>
 <body>
 
+    <!-- الشريط الجانبي -->
     <div class="sidebar">
         <a href="index.html"><i class="fas fa-home"></i></a>
         <a href="profile.html">
@@ -73,43 +102,14 @@
         </a>
     </div>
 
+    <!-- الأيقونة / الدائرة المركزية في منتصف الشاشة -->
+    <a href="aaaa.html" class="absolute-center-profile">
+        <svg width="160" height="160" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="50" cy="50" r="48" fill="#FFFFFF" />
+            <circle cx="50" cy="36" r="14" fill="#B97A57" />
+            <path d="M50 56 C32 56 22 68 22 80 C22 82 24 83 26 83 L74 83 C76 83 78 82 78 80 C78 68 68 56 50 56 Z" fill="#B97A57" />
+        </svg>
+    </a>
+
 </body>
 </html>
-
-
-
-<style>
-    /* هذا الكود يتحكم فقط في الدائرة التي في منتصف الصفحة ويجبرها على السنتر المطلق */
-    .absolute-center-profile {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%); /* التوسيط الهندسي الدقيق */
-        z-index: 9999;
-        display: block;
-        transition: transform 0.3s ease, filter 0.3s ease;
-    }
-
-    /* تأثير تفاعلي ممتع عند تمرير الماوس */
-    .absolute-center-profile:hover {
-        transform: translate(-50%, -50%) scale(1.1); /* تكبير خفيف دون خسارة التوسيط */
-        filter: drop-shadow(0 0 20px rgba(185, 122, 87, 0.5)); /* توهج بني ناعم */
-    }
-    
-    /* عند الضغط الفعلي */
-    .absolute-center-profile:active {
-        transform: translate(-50%, -50%) scale(0.95);
-    }
-</style>
-
-<a href="aaaa.html" class="absolute-center-profile">
-    <svg width="160" height="160" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-        <circle cx="50" cy="50" r="48" fill="#FFFFFF" />
-        
-        <circle cx="50" cy="36" r="14" fill="#B97A57" />
-        
-        <path d="M50 56 C32 56 22 68 22 80 C22 82 24 83 26 83 L74 83 C76 83 78 82 78 80 C78 68 68 56 50 56 Z" fill="#B97A57" />
-    </svg>
-</a>
-
-

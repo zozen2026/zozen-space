@@ -1,677 +1,492 @@
 <!DOCTYPE html>
-<html lang="en" dir="ltr">
+<html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Doors OS - Sovereign Hardware Environment</title>
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- FontAwesome Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>Home - Orange Design & Server Vector AI</title>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <!-- Supabase Library -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <!-- التحقق الفوري من الحساب قبل تحميل الصفحة لتوجيه المستخدم تلقائياً -->
+    <script>
+        const existingUser = localStorage.getItem('zeno_current_user');
+        if (existingUser) {
+            // إذا وجد حساب مسجل مسبقاً، يمكن توجيهه للوحة أو الصفحة المطلوبة فوراً (مثلاً index.html أو أي صفحة أساسية)
+            // ملاحظة: إذا كانت هذه الصفحة هي نفسه index.html، يمكنك تخصيص الشرط ألا يحصل تكرار لا نهائي، 
+            // ولكن بناءً على طلبك (الذهاب لملف index.html لو كان مسجلاً)، تم وضع الكود التالي:
+            if (window.location.pathname.indexOf('index.html') === -1 && window.location.pathname !== '/' && window.location.pathname.length > 1) {
+                // إذا لم يكن في الرئيسية ووجد حساب، يتم نقله بسلاسة
+                // window.location.href = 'index.html';
+            }
+        }
+    </script>
+
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap');
+        :root {
+            --bg-color: #F4EAE1;
+            --card-bg: #ffffff;
+            --accent-color: #ff6600;
+            --text-color: #333333;
+            --danger-color: #ef4444;
+            --warning-color: #f59e0b;
+            --success-color: #22c55e;
+        }
         body { 
-            font-family: 'Inter', sans-serif; 
-            user-select: none; 
-            overflow: hidden;
+            margin: 0; 
+            padding: 0; 
+            background-color: var(--bg-color) !important; 
+            font-family: 'Segoe UI', sans-serif; 
+            overflow-x: hidden;
+            position: relative;
+            min-height: 100vh;
         }
-        .window { 
-            transition: box-shadow 0.2s; 
+
+        .sidebar { 
+            position: fixed; 
+            right: 0; 
+            top: 0; 
+            height: 100%; 
+            width: 80px; 
+            background: rgb(255, 255, 255); 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            padding-top: 30px; 
+            z-index: 2000;
+            box-shadow: -2px 0 10px rgba(0,0,0,0.1);
+            transition: 0.3s;
         }
-        .window-maximized {
-            top: 0 !important;
-            left: 0 !important;
-            width: 100vw !important;
-            height: calc(100vh - 3.5rem) !important;
-            border-radius: 0 !important;
+        
+        .sidebar a { 
+            margin-bottom: 35px; 
+            color: rgb(255, 136, 0); 
+            font-size: 26px; 
+            text-decoration: none; 
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
-        iframe {
-            width: 100%;
-            height: 100%;
+        .sidebar a:hover { transform: scale(1.2); color: #ffe0b2; }
+
+        .header-top {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 80px;
+            height: 80px;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 30px;
+            z-index: 500;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            transition: 0.3s;
+        }
+
+        .my-logo { width: 40px; height: 40px; object-fit: contain; }
+
+        .search-box { position: relative; width: 300px; }
+        .search-box input { 
+            width: 100%; 
+            padding: 10px 45px 10px 15px; 
+            border: 2px solid orange; 
+            border-radius: 50px; 
+            outline: none;
+        }
+        .search-box i { 
+            position: absolute; 
+            right: 15px; 
+            top: 50%; 
+            transform: translateY(-50%); 
+            color: orange; 
+        }
+
+        .video-grid { 
+            display: grid; 
+            grid-template-columns: repeat(3, 1fr); 
+            gap: 25px; 
+            padding: 120px 100px 40px 40px; 
+            direction: rtl; 
+        }
+
+        .video-card { 
+            background: white; 
+            border-radius: 15px; 
+            overflow: hidden; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08); 
+            border-bottom: 4px solid transparent;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s, border-bottom 0.3s;
+        }
+        .video-card:hover {
+            transform: translateY(-5px);
+            border-bottom: 4px solid orange;
+        }
+
+        .video-thumb { 
+            width: 100%; 
+            aspect-ratio: 16 / 9; 
+            background: #000; 
+            object-fit: cover; 
+            display: block;
+            cursor: pointer;
+        }
+
+        .video-info-area { padding: 15px; flex-grow: 1; text-align: right; }
+        .video-title { font-weight: bold; color: #333; margin-bottom: 8px; display: block; font-size: 1.05rem; cursor: pointer; transition: color 0.2s; }
+        .video-title:hover { color: var(--accent-color); }
+        
+        .card-meta { color: #666; font-size: 13px; display: flex; flex-direction: column; gap: 4px; margin-bottom: 12px; }
+        
+        .ai-badges {
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+            margin-top: 5px;
+        }
+        .badge {
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: bold;
+        }
+        .badge-testing { background-color: var(--warning-color); color: #000; }
+        .badge-promoted { background-color: var(--success-color); color: #fff; }
+        .badge-forgiven { background-color: #8b5cf6; color: #fff; }
+
+        .ai-actions {
+            display: flex;
+            gap: 5px;
+            padding: 0 15px 15px 15px;
+        }
+        .ai-btn {
+            flex: 1;
+            padding: 6px 4px;
+            font-size: 11px;
             border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            color: white;
+            transition: opacity 0.2s;
+        }
+        .btn-like { background-color: var(--success-color); }
+        .btn-watch { background-color: var(--accent-color); }
+        .btn-skip { background-color: var(--danger-color); }
+        .ai-btn:hover { opacity: 0.85; }
+
+        .profile-fixed-btn {
+            position: absolute;
+            top: 20px;
+            left: 60%;
+            transform: translateX(-50%);
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            width: 60px;
+            height: 60px;
+            background: #ff6600;
+            border-radius: 50%;
+            z-index: 600;
+        }
+        .profile-fixed-btn svg {
+            width: 32px;
+            height: 32px;
+            fill: white;
+        }
+
+        .multi-lang-msg {
+            grid-column: span 3;
+            text-align: center;
+            font-size: 18px;
+            color: #333;
+            line-height: 1.8;
+        }
+        .multi-lang-msg span { display: block; }
+        .lang-en { font-weight: bold; direction: ltr; }
+        .lang-ar { direction: rtl; color: #555; }
+        .lang-ru { direction: ltr; color: #666; }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                top: auto; bottom: 0; right: 0; left: 0;
+                width: 100%; height: 65px;
+                flex-direction: row; justify-content: space-around;
+                padding-top: 0;
+            }
+            .sidebar a { margin-bottom: 0; font-size: 22px; }
+            .header-top { right: 0; height: 65px; padding: 0 15px; left: 0; }
+            .video-grid { grid-template-columns: 1fr !important; padding: 80px 15px 85px 15px; gap: 20px; }
+            .multi-lang-msg { grid-column: span 1; }
         }
     </style>
 </head>
-<body id="os-body" class="h-screen w-screen text-white flex flex-col justify-between relative bg-cover bg-center transition-all duration-500" style="background-image: radial-gradient(circle at center, #1e293b 0%, #090d16 100%);">
+<body>
 
-    <!-- Desktop Icons Grid -->
-    <div class="p-6 grid grid-cols-4 sm:grid-cols-6 gap-5 w-fit z-0">
-        <!-- 1. Zozen -->
-        <div onclick="openApp('zozen')" class="flex flex-col items-center cursor-pointer group p-2 rounded-xl hover:bg-white/10 transition">
-            <div class="w-14 h-14 bg-orange-600 rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-105 transition border border-orange-400/30">
-                <i class="fa-solid fa-bolt text-2xl text-white"></i>
-            </div>
-            <span class="text-xs mt-2 text-slate-200 font-medium drop-shadow">Zozen</span>
-        </div>
-
-        <!-- 2. Zozen Store -->
-        <div onclick="openApp('store')" class="flex flex-col items-center cursor-pointer group p-2 rounded-xl hover:bg-white/10 transition">
-            <div class="w-14 h-14 bg-indigo-600 rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-105 transition border border-indigo-400/30">
-                <i class="fa-solid fa-store text-2xl text-white"></i>
-            </div>
-            <span class="text-xs mt-2 text-slate-200 font-medium drop-shadow">Zozen Store</span>
-        </div>
-
-        <!-- 3. System Installer Hub -->
-        <div onclick="openApp('installer')" class="flex flex-col items-center cursor-pointer group p-2 rounded-xl hover:bg-white/10 transition">
-            <div class="w-14 h-14 bg-gradient-to-tr from-orange-600 to-amber-500 rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-105 transition border border-orange-300/40 animate-pulse">
-                <i class="fa-solid fa-compact-disc text-2xl text-white"></i>
-            </div>
-            <span class="text-xs mt-2 text-orange-400 font-bold drop-shadow">Get Doors OS</span>
-        </div>
-
-        <!-- 4. Browser Hub -->
-        <div onclick="openApp('browser')" class="flex flex-col items-center cursor-pointer group p-2 rounded-xl hover:bg-white/10 transition">
-            <div class="w-14 h-14 bg-amber-500 rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-105 transition border border-amber-300/30">
-                <i class="fa-brands fa-chrome text-2xl text-white"></i>
-            </div>
-            <span class="text-xs mt-2 text-slate-200 font-medium drop-shadow">Browser Hub</span>
-        </div>
-
-        <!-- 5. Google Gemini -->
-        <div onclick="openApp('gemini')" class="flex flex-col items-center cursor-pointer group p-2 rounded-xl hover:bg-white/10 transition">
-            <div class="w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-105 transition border border-blue-400/30" style="background: linear-gradient(135deg, #1a73e8 0%, #8ab4f8 50%, #c5221f 100%);">
-                <i class="fa-solid fa-wand-magic-sparkles text-2xl text-white"></i>
-            </div>
-            <span class="text-xs mt-2 text-slate-200 font-medium drop-shadow">Gemini</span>
-        </div>
-
-        <!-- 6. Telegram -->
-        <div onclick="openApp('telegram')" class="flex flex-col items-center cursor-pointer group p-2 rounded-xl hover:bg-white/10 transition">
-            <div class="w-14 h-14 bg-sky-500 rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-105 transition border border-sky-300/30">
-                <i class="fa-brands fa-telegram text-2xl text-white"></i>
-            </div>
-            <span class="text-xs mt-2 text-slate-200 font-medium drop-shadow">Telegram</span>
-        </div>
-
-        <!-- 7. YouTube -->
-        <div onclick="openApp('youtube')" class="flex flex-col items-center cursor-pointer group p-2 rounded-xl hover:bg-white/10 transition">
-            <div class="w-14 h-14 bg-red-600 rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-105 transition border border-red-400/30">
-                <i class="fa-brands fa-youtube text-2xl text-white"></i>
-            </div>
-            <span class="text-xs mt-2 text-slate-200 font-medium drop-shadow">YouTube</span>
-        </div>
-
-        <!-- 8. Facebook -->
-        <div onclick="openApp('facebook')" class="flex flex-col items-center cursor-pointer group p-2 rounded-xl hover:bg-white/10 transition">
-            <div class="w-14 h-14 bg-blue-600 rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-105 transition border border-blue-400/30">
-                <i class="fa-brands fa-facebook-f text-2xl text-white"></i>
-            </div>
-            <span class="text-xs mt-2 text-slate-200 font-medium drop-shadow">Facebook</span>
-        </div>
-
-        <!-- 9. TikTok -->
-        <div onclick="openApp('tiktok')" class="flex flex-col items-center cursor-pointer group p-2 rounded-xl hover:bg-white/10 transition">
-            <div class="w-14 h-14 bg-black rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-105 transition border border-zinc-700">
-                <i class="fa-brands fa-tiktok text-2xl text-white"></i>
-            </div>
-            <span class="text-xs mt-2 text-slate-200 font-medium drop-shadow">TikTok</span>
-        </div>
-
-        <!-- 10. Instagram -->
-        <div onclick="openApp('instagram')" class="flex flex-col items-center cursor-pointer group p-2 rounded-xl hover:bg-white/10 transition">
-            <div class="w-14 h-14 bg-gradient-to-tr from-amber-500 via-rose-600 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-105 transition border border-pink-400/30">
-                <i class="fa-brands fa-instagram text-2xl text-white"></i>
-            </div>
-            <span class="text-xs mt-2 text-slate-200 font-medium drop-shadow">Instagram</span>
-        </div>
-
-        <!-- 11. WhatsApp -->
-        <div onclick="openApp('whatsapp')" class="flex flex-col items-center cursor-pointer group p-2 rounded-xl hover:bg-white/10 transition">
-            <div class="w-14 h-14 bg-emerald-600 rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-105 transition border border-emerald-400/30">
-                <i class="fa-brands fa-whatsapp text-2xl text-white"></i>
-            </div>
-            <span class="text-xs mt-2 text-slate-200 font-medium drop-shadow">WhatsApp</span>
-        </div>
-
-        <!-- 12. Settings -->
-        <div onclick="openApp('settings')" class="flex flex-col items-center cursor-pointer group p-2 rounded-xl hover:bg-white/10 transition">
-            <div class="w-14 h-14 bg-slate-700 rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-105 transition border border-slate-500/30">
-                <i class="fa-solid fa-gear text-2xl text-slate-200"></i>
-            </div>
-            <span class="text-xs mt-2 text-slate-200 font-medium drop-shadow">Settings</span>
-        </div>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <a href="index.html"><i class="fas fa-house"></i></a>
+        <a href="profile.html"><i class="fas fa-circle-user"></i></a>
+        <a href="bell.html"><i class="fas fa-bell"></i></a>
+        <a href="create.html"><i class="fas fa-external-link-alt"></i></a>
     </div>
 
-    <!-- Windows Container -->
-    <div id="windows-container" class="absolute inset-0 pointer-events-none overflow-hidden"></div>
-
-    <!-- Right-Click Context Menu -->
-    <div id="context-menu" class="absolute hidden w-52 bg-slate-900/95 backdrop-blur-xl border border-slate-700 rounded-xl shadow-2xl p-1.5 z-50 text-slate-200 text-xs">
-        <button onclick="refreshDesktop()" class="w-full text-left px-3 py-2 hover:bg-orange-600 hover:text-white rounded-lg flex items-center gap-3 transition">
-            <i class="fa-solid fa-rotate"></i> Refresh System
-        </button>
-        <button onclick="changeWallpaper()" class="w-full text-left px-3 py-2 hover:bg-orange-600 hover:text-white rounded-lg flex items-center gap-3 transition">
-            <i class="fa-solid fa-image"></i> Change Wallpaper
-        </button>
-        <div class="h-px bg-slate-800 my-1"></div>
-        <button onclick="openApp('installer')" class="w-full text-left px-3 py-2 text-orange-400 hover:bg-orange-600 hover:text-white rounded-lg flex items-center gap-3 transition font-bold">
-            <i class="fa-solid fa-compact-disc"></i> Download Doors OS ISO
-        </button>
-        <button onclick="openAuthModal()" class="w-full text-left px-3 py-2 hover:bg-orange-600 hover:text-white rounded-lg flex items-center gap-3 transition">
-            <i class="fa-solid fa-user-circle"></i> Account / Sign In
-        </button>
+    <div class="header-top">
+        <div class="center-content">
+            <img src=".png-image_16162666.png" alt="Logo" class="my-logo" onerror="this.style.display='none'">
+        </div>
+        <div class="search-box-wrapper">
+            <form action="search.html" method="GET" class="search-box">
+                <button type="submit" style="background: none; border: none; padding: 0; cursor: pointer; color: inherit;">
+                    <i class="fas fa-search"></i>
+                </button>
+                <input type="text" name="query" placeholder="Search for a video...">
+            </form>
+        </div>
+        <a href="profile.html" class="profile-fixed-btn">
+            <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+        </a>
     </div>
 
-    <!-- In-System Custom Notification Modal -->
-    <div id="os-notification" class="absolute inset-0 bg-black/50 backdrop-blur-sm hidden flex items-center justify-center z-50 pointer-events-auto">
-        <div class="bg-slate-900 border border-orange-500/40 w-[420px] rounded-2xl p-6 shadow-2xl text-slate-200 text-center relative">
-            <div id="notif-icon" class="w-12 h-12 bg-orange-600/20 text-orange-400 rounded-2xl mx-auto flex items-center justify-center text-xl mb-3 border border-orange-500/30">
-                <i class="fa-solid fa-download animate-bounce"></i>
-            </div>
-            <h3 id="notif-title" class="font-bold text-base text-white mb-1">Preparing ISO Package</h3>
-            <p id="notif-desc" class="text-xs text-slate-400 mb-4">Building bootloader configuration and system images...</p>
-            
-            <div class="w-full bg-slate-950 rounded-full h-2.5 mb-4 border border-slate-800 overflow-hidden">
-                <div id="notif-progress" class="bg-gradient-to-r from-orange-600 to-amber-500 h-2.5 rounded-full w-0 transition-all duration-300"></div>
-            </div>
-
-            <button onclick="closeOsNotification()" id="notif-btn" class="w-full bg-slate-800 hover:bg-slate-700 text-white font-bold py-2 rounded-xl text-xs transition hidden">Close</button>
-        </div>
-    </div>
-
-    <!-- Auth / Account Modal -->
-    <div id="auth-modal" class="absolute inset-0 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center z-50 pointer-events-auto">
-        <div class="bg-slate-900 border border-slate-700 w-96 rounded-2xl p-6 shadow-2xl text-slate-200 relative">
-            <button onclick="closeAuthModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
-            <div class="text-center mb-6">
-                <div class="w-12 h-12 bg-orange-600 rounded-2xl mx-auto flex items-center justify-center text-white text-xl font-bold mb-2">D</div>
-                <h3 class="font-bold text-base text-white">Doors OS Account</h3>
-                <p id="auth-subtitle" class="text-xs text-slate-400">Sign in or create a sovereign account</p>
-            </div>
-            <div id="auth-form-content" class="space-y-4 text-xs">
-                <div>
-                    <label class="block text-slate-400 mb-1">Email / Username</label>
-                    <input type="text" id="auth-user" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-orange-500" placeholder="user@doors.os">
-                </div>
-                <div>
-                    <label class="block text-slate-400 mb-1">Password</label>
-                    <input type="password" id="auth-pass" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-orange-500" placeholder="••••••••">
-                </div>
-                <button onclick="handleAuthSubmit()" class="w-full bg-orange-600 hover:bg-orange-500 text-white font-bold py-2.5 rounded-xl transition shadow-lg">Sign In</button>
-                <div class="text-center pt-2">
-                    <span id="auth-toggle-text" class="text-slate-400">Don't have an account? <button onclick="toggleAuthMode()" class="text-orange-400 font-bold hover:underline">Create Account</button></span>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Start Menu -->
-    <div id="start-menu" class="absolute bottom-16 left-4 w-72 bg-slate-900/95 backdrop-blur-xl border border-slate-700 rounded-2xl shadow-2xl p-4 hidden flex-col z-50 text-slate-200">
-        <div class="flex items-center gap-3 pb-3 border-b border-slate-800 mb-3">
-            <div class="w-10 h-10 bg-orange-600 rounded-full flex items-center justify-center font-bold text-lg text-white">D</div>
-            <div>
-                <h3 id="current-user-display" class="font-bold text-sm">Guest User</h3>
-                <span class="text-xs text-orange-400">● Sovereign Hardware OS</span>
-            </div>
-        </div>
-        <div class="space-y-1 text-sm max-h-60 overflow-y-auto">
-            <button onclick="openApp('installer'); toggleStartMenu();" class="w-full text-left px-3 py-2 bg-orange-600/20 text-orange-400 font-bold rounded-lg flex items-center gap-3 transition mb-1">
-                <i class="fa-solid fa-compact-disc"></i> Download Doors OS (ISO)
-            </button>
-            <button onclick="openApp('zozen'); toggleStartMenu();" class="w-full text-left px-3 py-1.5 hover:bg-slate-800 rounded-lg flex items-center gap-3 transition">
-                <i class="fa-solid fa-bolt text-orange-400"></i> Zozen
-            </button>
-            <button onclick="openApp('store'); toggleStartMenu();" class="w-full text-left px-3 py-1.5 hover:bg-slate-800 rounded-lg flex items-center gap-3 transition">
-                <i class="fa-solid fa-store text-indigo-400"></i> Zozen Store
-            </button>
-            <button onclick="openApp('browser'); toggleStartMenu();" class="w-full text-left px-3 py-1.5 hover:bg-slate-800 rounded-lg flex items-center gap-3 transition">
-                <i class="fa-brands fa-chrome text-amber-400"></i> Browser Hub
-            </button>
-            <button onclick="openApp('gemini'); toggleStartMenu();" class="w-full text-left px-3 py-1.5 hover:bg-slate-800 rounded-lg flex items-center gap-3 transition">
-                <i class="fa-solid fa-wand-magic-sparkles text-blue-400"></i> Google Gemini
-            </button>
-            <button onclick="openApp('telegram'); toggleStartMenu();" class="w-full text-left px-3 py-1.5 hover:bg-slate-800 rounded-lg flex items-center gap-3 transition">
-                <i class="fa-brands fa-telegram text-sky-400"></i> Telegram
-            </button>
-            <button onclick="openApp('youtube'); toggleStartMenu();" class="w-full text-left px-3 py-1.5 hover:bg-slate-800 rounded-lg flex items-center gap-3 transition">
-                <i class="fa-brands fa-youtube text-red-400"></i> YouTube
-            </button>
-            <button onclick="openApp('facebook'); toggleStartMenu();" class="w-full text-left px-3 py-1.5 hover:bg-slate-800 rounded-lg flex items-center gap-3 transition">
-                <i class="fa-brands fa-facebook-f text-blue-400"></i> Facebook
-            </button>
-            <button onclick="openApp('tiktok'); toggleStartMenu();" class="w-full text-left px-3 py-1.5 hover:bg-slate-800 rounded-lg flex items-center gap-3 transition">
-                <i class="fa-brands fa-tiktok text-white"></i> TikTok
-            </button>
-            <button onclick="openApp('instagram'); toggleStartMenu();" class="w-full text-left px-3 py-1.5 hover:bg-slate-800 rounded-lg flex items-center gap-3 transition">
-                <i class="fa-brands fa-instagram text-pink-400"></i> Instagram
-            </button>
-            <button onclick="openApp('whatsapp'); toggleStartMenu();" class="w-full text-left px-3 py-1.5 hover:bg-slate-800 rounded-lg flex items-center gap-3 transition">
-                <i class="fa-brands fa-whatsapp text-emerald-400"></i> WhatsApp
-            </button>
-            <button onclick="openApp('settings'); toggleStartMenu();" class="w-full text-left px-3 py-1.5 hover:bg-slate-800 rounded-lg flex items-center gap-3 transition border-t border-slate-800 mt-1 pt-2">
-                <i class="fa-solid fa-gear text-slate-400"></i> System Settings
-            </button>
-        </div>
-        <div class="pt-3 mt-3 border-t border-slate-800 flex justify-between items-center text-xs text-slate-400">
-            <span>Doors OS v6.3</span>
-            <button onclick="openAuthModal(); toggleStartMenu();" class="text-orange-400 font-bold hover:underline">Account</button>
-        </div>
-    </div>
-
-    <!-- Taskbar -->
-    <div class="h-14 bg-slate-900/80 backdrop-blur-md border-t border-slate-800 px-4 flex items-center justify-between z-40">
-        <div class="flex items-center gap-3">
-            <button onclick="toggleStartMenu()" class="h-10 px-4 bg-orange-600 hover:bg-orange-500 rounded-xl font-bold flex items-center gap-2 shadow-lg transition border border-orange-400/30 text-white">
-                <i class="fa-solid fa-door-open text-lg"></i>
-                <span>Doors</span>
-            </button>
-            
-            <div id="taskbar-apps" class="flex items-center gap-1 border-l border-slate-700 pl-3 overflow-x-auto"></div>
-        </div>
-
-        <div class="flex items-center gap-4 text-xs text-slate-300 font-medium">
-            <span class="bg-orange-500/10 text-orange-400 border border-orange-500/20 px-2.5 py-1 rounded-full flex items-center gap-1.5">
-                <i class="fa-solid fa-microchip"></i> Hardware-Ready OS
-            </span>
-            <span id="clock" class="bg-slate-800/80 px-3 py-1.5 rounded-xl border border-slate-700">00:00</span>
-        </div>
-    </div>
+    <div class="video-grid" id="mainGrid"></div>
 
     <script>
-        // System Clock
-        setInterval(() => {
-            const now = new Date();
-            document.getElementById('clock').innerText = now.toLocaleTimeString('en-US', {hour: '2-digit', minute:'2-digit'});
-        }, 1000);
+        const SUPABASE_URL = "https://lzvtnfdgynwczrkwlwhf.supabase.co";
+        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx6dnRuZmRneW53Y3pya3dsd2hmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkxNDIxMTEsImV4cCI6MjEwNDcxODExMX0.w2hNlJ4SszyMBkUVjr1qiWNTTPxHMHkM9YOFtVP-pVI";
 
-        // Context Menu Logic
-        const contextMenu = document.getElementById('context-menu');
-        window.addEventListener('click', () => contextMenu.classList.add('hidden'));
-        window.addEventListener('contextmenu', (e) => {
-            e.preventDefault();
-            contextMenu.style.top = `${e.clientY}px`;
-            contextMenu.style.left = `${e.clientX}px`;
-            contextMenu.classList.remove('hidden');
+        let supabaseClient = null;
+        if (window.supabase) {
+            supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        }
+
+        let userVector = [0, 0, 0, 0, 0];
+
+        function textToVector(text) {
+            let vec = [0, 0, 0, 0, 0];
+            if (!text) return vec;
+            let t = text.toLowerCase();
+            if (t.includes('python') || t.includes('برمجة') || t.includes('كود') || t.includes('code')) vec[0] += 1.0;
+            if (t.includes('minecraft') || t.includes('ماينكرافت') || t.includes('العاب') || t.includes('game')) vec[1] += 1.0;
+            if (t.includes('pc') || t.includes('حاسوب') || t.includes('xbox') || t.includes('اكس بوكس') || t.includes('كرت')) vec[2] += 1.0;
+            if (t.includes('america') || t.includes('امريكا') || t.includes('سفر') || t.includes('travel')) vec[3] += 1.0;
+            if (t.includes('math') || t.includes('رياضيات') || t.includes('خوارزميات') || t.includes('vector')) vec[4] += 1.0;
+            
+            let mag = Math.sqrt(vec.reduce((sum, val) => sum + val * val, 0));
+            return mag === 0 ? vec : vec.map(v => v / mag);
+        }
+
+        function calculateCosineSimilarity(vecA, vecB) {
+            let dotProduct = 0, normA = 0, normB = 0;
+            for (let i = 0; i < vecA.length; i++) {
+                dotProduct += vecA[i] * vecB[i];
+                normA += vecA[i] * vecA[i];
+                normB += vecB[i] * vecB[i];
+            }
+            if (normA === 0 || normB === 0) return 0.1;
+            return dotProduct / (Math.sqrt(normA) * Math.sqrt(normB));
+        }
+
+        window.addEventListener("DOMContentLoaded", async () => {
+            // التحقق النهائي من الحساب عند التحميل المباشر وتوجيه المستخدم لـ index.html إن وُجد
+            const currentLoggedInUser = localStorage.getItem('zeno_current_user');
+            if (currentLoggedInUser) {
+                // إذا كان مسجلاً وفيه حساب مسبق، يتم الانتقال لـ index.html فوراً (تأكد من عدم حدوث حلقة تحويل إذا كانت الصفحة الحالية هي نفسها index.html)
+                if (window.location.pathname.indexOf('index.html') === -1 && window.location.pathname.length > 1) {
+                    window.location.href = 'index.html';
+                    return;
+                }
+            }
+
+            if (supabaseClient) {
+                try {
+                    await supabaseClient.auth.getSession();
+                } catch (e) {
+                    console.log("Session check bypassed safely");
+                }
+            }
+            await loadAndProcessVideosFromCloud();
         });
 
-        function refreshDesktop() {
-            location.reload();
-        }
+        async function loadAndProcessVideosFromCloud() {
+            const grid = document.getElementById('mainGrid');
+            let posts = [];
 
-        const wallpapers = [
-            "radial-gradient(circle at center, #1e293b 0%, #090d16 100%)",
-            "radial-gradient(circle at center, #3b1e29 0%, #160909 100%)",
-            "radial-gradient(circle at center, #1e3b29 0%, #09160d 100%)",
-            "linear-gradient(to bottom right, #0f172a, #311042)"
-        ];
-        let currentWp = 0;
-        function changeWallpaper() {
-            currentWp = (currentWp + 1) % wallpapers.length;
-            document.getElementById('os-body').style.backgroundImage = wallpapers[currentWp];
-        }
-
-        function triggerDownloadSimulation(type) {
-            const modal = document.getElementById('os-notification');
-            const title = document.getElementById('notif-title');
-            const desc = document.getElementById('notif-desc');
-            const progressBar = document.getElementById('notif-progress');
-            const btn = document.getElementById('notif-btn');
-
-            modal.classList.remove('hidden');
-            progressBar.style.width = '0%';
-            btn.classList.add('hidden');
-
-            if (type === 'clean') {
-                title.innerText = "Building Clean Install ISO (x86_64)";
-                desc.innerText = "Compiling sovereign Linux kernel and UI shell...";
-            } else {
-                title.innerText = "Preparing Dual-Boot Package";
-                desc.innerText = "Configuring GRUB bootloader and partition tables...";
-            }
-
-            let progress = 0;
-            const interval = setInterval(() => {
-                progress += 10;
-                progressBar.style.width = progress + '%';
-                if (progress >= 100) {
-                    clearInterval(interval);
-                    title.innerText = "Download Ready!";
-                    desc.innerText = "Doors OS installation package has been successfully prepared.";
-                    btn.classList.remove('hidden');
+            if (supabaseClient) {
+                try {
+                    let { data, error } = await supabaseClient.from('videos').select('*');
+                    if (!error && data && data.length > 0) {
+                        posts = data;
+                    }
+                } catch (e) {
+                    console.log("Supabase fetch fallback to localStorage");
                 }
-            }, 250);
-        }
-
-        function closeOsNotification() {
-            document.getElementById('os-notification').classList.add('hidden');
-        }
-
-        let isSignUpMode = false;
-        function openAuthModal() {
-            document.getElementById('auth-modal').classList.remove('hidden');
-        }
-        function closeAuthModal() {
-            document.getElementById('auth-modal').classList.add('hidden');
-        }
-        function toggleAuthMode() {
-            isSignUpMode = !isSignUpMode;
-            const sub = document.getElementById('auth-subtitle');
-            const toggleText = document.getElementById('auth-toggle-text');
-            if (isSignUpMode) {
-                sub.innerText = "Register a new Sovereign account";
-                toggleText.innerHTML = `Already have an account? <button onclick="toggleAuthMode()" class="text-orange-400 font-bold hover:underline">Sign In</button>`;
-            } else {
-                sub.innerText = "Sign in or create a sovereign account";
-                toggleText.innerHTML = `Don't have an account? <button onclick="toggleAuthMode()" class="text-orange-400 font-bold hover:underline">Create Account</button>`;
-            }
-        }
-        function handleAuthSubmit() {
-            const user = document.getElementById('auth-user').value;
-            if(!user) { alert("Please enter a valid username/email"); return; }
-            document.getElementById('current-user-display').innerText = user;
-            alert(isSignUpMode ? "Account created successfully!" : "Signed in successfully!");
-            closeAuthModal();
-        }
-
-        function toggleStartMenu() {
-            const menu = document.getElementById('start-menu');
-            menu.classList.toggle('hidden');
-            menu.classList.toggle('flex');
-        }
-
-        window.zIndexCounter = 10;
-
-        // Apps Configuration
-        const appData = {
-            'zozen': { 
-                title: 'Zozen App', 
-                icon: 'fa-bolt text-orange-400', 
-                url: 'https://zozen.vercel.app',
-                mode: 'internal'
-            },
-            'store': { 
-                title: 'Zozen Store', 
-                icon: 'fa-store text-indigo-400', 
-                url: 'https://zozen2026.github.io/Zozen-store/',
-                mode: 'internal'
-            },
-            'installer': {
-                title: 'Doors OS Hardware Installer Hub',
-                icon: 'fa-compact-disc text-orange-400',
-                mode: 'installer'
-            },
-            'browser': { 
-                title: 'Browser Hub', 
-                icon: 'fa-chrome text-amber-400', 
-                url: 'https://www.google.com',
-                mode: 'browser'
-            },
-            'gemini': { 
-                title: 'Google Gemini', 
-                icon: 'fa-wand-magic-sparkles text-blue-400', 
-                url: 'https://gemini.google.com',
-                mode: 'internal'
-            },
-            'telegram': { 
-                title: 'Telegram Web', 
-                icon: 'fa-telegram text-sky-400', 
-                url: 'https://web.telegram.org',
-                mode: 'internal'
-            },
-            'youtube': { 
-                title: 'YouTube', 
-                icon: 'fa-youtube text-red-500', 
-                url: 'https://www.youtube.com/embed',
-                mode: 'internal'
-            },
-            'facebook': { 
-                title: 'Facebook', 
-                icon: 'fa-facebook-f text-blue-500', 
-                url: 'https://www.facebook.com',
-                mode: 'internal'
-            },
-            'tiktok': { 
-                title: 'TikTok', 
-                icon: 'fa-tiktok text-white', 
-                url: 'https://www.tiktok.com',
-                mode: 'internal'
-            },
-            'instagram': { 
-                title: 'Instagram', 
-                icon: 'fa-instagram text-pink-500', 
-                url: 'https://www.instagram.com',
-                mode: 'internal'
-            },
-            'whatsapp': { 
-                title: 'WhatsApp Web', 
-                icon: 'fa-whatsapp text-emerald-500', 
-                url: 'https://web.whatsapp.com',
-                mode: 'internal'
-            },
-            'settings': {
-                title: 'System Settings',
-                icon: 'fa-gear text-slate-300',
-                mode: 'settings'
-            }
-        };
-
-        function openApp(appKey) {
-            const app = appData[appKey];
-
-            if (app.mode === 'installer') {
-                createInstallerWindow(appKey, app);
-                return;
             }
 
-            if (app.mode === 'settings') {
-                createSettingsWindow(appKey, app);
-                return;
+            if (posts.length === 0) {
+                let rawPosts = JSON.parse(localStorage.getItem('all_published_videos') || '[]');
+                posts = rawPosts.map((post, idx) => ({
+                    id: post.id || idx,
+                    title: post.title || "Untitled",
+                    author: post.author || "User",
+                    url: post.url,
+                    views: post.views !== undefined ? post.views : Math.floor(Math.random() * 120),
+                    ignores: post.ignores !== undefined ? post.ignores : 0,
+                    forgiveness_used: post.forgiveness_used !== undefined ? post.forgiveness_used : false,
+                    is_buried: post.is_buried !== undefined ? post.is_buried : false,
+                    originalIndex: idx
+                }));
             }
 
-            const existingWin = document.getElementById(`win-${appKey}`);
-            if (existingWin) {
-                if (existingWin.style.display === 'none') existingWin.style.display = 'flex';
-                bringToFront(existingWin);
-                return;
-            }
-
-            const winDiv = document.createElement('div');
-            winDiv.id = `win-${appKey}`;
-            winDiv.className = 'window absolute top-16 left-20 w-[950px] h-[620px] bg-slate-900/95 backdrop-blur-xl border border-slate-700/80 rounded-2xl shadow-2xl flex flex-col pointer-events-auto overflow-hidden';
-            winDiv.onclick = () => bringToFront(winDiv);
-
-            let browserToolbar = '';
-            if (app.mode === 'browser') {
-                browserToolbar = `
-                    <div class="h-9 bg-slate-900 border-b border-slate-800 px-3 flex items-center gap-2">
-                        <button onclick="document.getElementById('iframe-${appKey}').contentWindow.history.back()" class="text-slate-400 hover:text-white px-1.5 py-0.5 rounded hover:bg-slate-800"><i class="fa-solid fa-arrow-left text-xs"></i></button>
-                        <button onclick="document.getElementById('iframe-${appKey}').contentWindow.history.forward()" class="text-slate-400 hover:text-white px-1.5 py-0.5 rounded hover:bg-slate-800"><i class="fa-solid fa-arrow-right text-xs"></i></button>
-                        <button onclick="document.getElementById('iframe-${appKey}').src = document.getElementById('iframe-${appKey}').src" class="text-slate-400 hover:text-white px-1.5 py-0.5 rounded hover:bg-slate-800"><i class="fa-solid fa-rotate text-xs"></i></button>
-                        <input type="text" value="${app.url}" class="flex-1 bg-slate-950 border border-slate-700 rounded-lg px-3 py-1 text-xs text-slate-200 focus:outline-none focus:border-amber-500" readonly>
-                        <span class="text-[10px] text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">Browser Hub</span>
+            if (posts.length === 0) {
+                grid.innerHTML = `
+                    <div class="multi-lang-msg">
+                        <span class="lang-en">No published videos available.</span>
+                        <span class="lang-ar">لا توجد فيديوهات منشورة متاحة حالياً.</span>
+                        <span class="lang-ru">Опубликованные видео пока недоступны.</span>
                     </div>
                 `;
-            }
-
-            winDiv.innerHTML = `
-                <div class="h-11 bg-slate-800/90 border-b border-slate-700/80 px-4 flex items-center justify-between cursor-move" onmousedown="startDrag(event, '${winDiv.id}')">
-                    <div class="flex items-center gap-2">
-                        <i class="${app.icon}"></i>
-                        <span class="font-bold text-sm text-slate-200">${app.title}</span>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <button onclick="minimizeWindow('${winDiv.id}')" class="w-6 h-6 rounded-lg hover:bg-slate-700 flex items-center justify-center text-slate-400 hover:text-white transition"><i class="fa-solid fa-minus text-xs"></i></button>
-                        <button onclick="toggleMaximize('${winDiv.id}')" class="w-6 h-6 rounded-lg hover:bg-slate-700 flex items-center justify-center text-slate-400 hover:text-white transition"><i class="fa-regular fa-square text-xs"></i></button>
-                        <button onclick="closeWindow('${winDiv.id}', '${appKey}')" class="w-6 h-6 rounded-lg bg-red-500/20 hover:bg-red-600 flex items-center justify-center text-red-400 hover:text-white transition"><i class="fa-solid fa-xmark text-xs"></i></button>
-                    </div>
-                </div>
-                ${browserToolbar}
-                <div class="flex-1 bg-slate-950 relative">
-                    <iframe id="iframe-${appKey}" src="${app.url}" class="w-full h-full" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; camera; microphone" allowfullscreen></iframe>
-                </div>
-            `;
-
-            document.getElementById('windows-container').appendChild(winDiv);
-            bringToFront(winDiv);
-            addTaskbarIcon(appKey);
-        }
-
-        // Hardware Installer Hub Window
-        function createInstallerWindow(appKey, app) {
-            const existingWin = document.getElementById(`win-${appKey}`);
-            if (existingWin) {
-                if (existingWin.style.display === 'none') existingWin.style.display = 'flex';
-                bringToFront(existingWin);
                 return;
             }
 
-            const winDiv = document.createElement('div');
-            winDiv.id = `win-${appKey}`;
-            winDiv.className = 'window absolute top-14 left-24 w-[760px] h-[520px] bg-slate-900/95 backdrop-blur-xl border border-orange-500/30 rounded-2xl shadow-2xl flex flex-col pointer-events-auto overflow-hidden';
-            winDiv.onclick = () => bringToFront(winDiv);
+            let scoredPosts = posts.map(post => {
+                if (post.is_buried) return { ...post, score: -999, statusText: "Buried (مدفون)", badgeClass: "" };
 
-            winDiv.innerHTML = `
-                <div class="h-11 bg-slate-800/90 border-b border-slate-700/80 px-4 flex items-center justify-between cursor-move" onmousedown="startDrag(event, '${winDiv.id}')">
-                    <div class="flex items-center gap-2">
-                        <i class="${app.icon}"></i>
-                        <span class="font-bold text-sm text-white">${app.title}</span>
-                    </div>
-                    <button onclick="closeWindow('${winDiv.id}', '${appKey}')" class="w-6 h-6 rounded-lg bg-red-500/20 hover:bg-red-600 flex items-center justify-center text-red-400 hover:text-white transition"><i class="fa-solid fa-xmark text-xs"></i></button>
-                </div>
-                <div class="p-6 flex-1 overflow-y-auto space-y-6">
-                    <div class="text-center space-y-2">
-                        <h2 class="text-xl font-bold text-orange-400">Deploy Doors OS on Native Hardware</h2>
-                        <p class="text-xs text-slate-400 max-w-lg mx-auto">Download the standalone installation image to transform your x86_64 PC into an independent computing environment.</p>
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-4">
-                        <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 flex flex-col justify-between">
-                            <div>
-                                <div class="text-orange-400 font-bold mb-1 flex items-center gap-2"><i class="fa-solid fa-download"></i> Full Bare-Metal ISO</div>
-                                <p class="text-xs text-slate-400">Erases existing partition and installs Doors OS as the primary sovereign operating system.</p>
-                            </div>
-                            <button onclick="triggerDownloadSimulation('clean')" class="mt-4 w-full bg-orange-600 hover:bg-orange-500 text-white font-bold py-2 rounded-xl text-xs transition">Download Bare-Metal ISO</button>
-                        </div>
-                        <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 flex flex-col justify-between">
-                            <div>
-                                <div class="text-amber-400 font-bold mb-1 flex items-center gap-2"><i class="fa-solid fa-cubes"></i> Dual-Boot Installer</div>
-                                <p class="text-xs text-slate-400">Installs alongside Windows or Linux with GRUB bootloader configuration.</p>
-                            </div>
-                            <button onclick="triggerDownloadSimulation('dual')" class="mt-4 w-full bg-amber-600 hover:bg-amber-500 text-white font-bold py-2 rounded-xl text-xs transition">Download Dual-Boot Installer</button>
-                        </div>
-                    </div>
-                </div>
-            `;
-
-            document.getElementById('windows-container').appendChild(winDiv);
-            bringToFront(winDiv);
-            addTaskbarIcon(appKey);
-        }
-
-        // Settings Window
-        function createSettingsWindow(appKey, app) {
-            const existingWin = document.getElementById(`win-${appKey}`);
-            if (existingWin) {
-                if (existingWin.style.display === 'none') existingWin.style.display = 'flex';
-                bringToFront(existingWin);
-                return;
-            }
-
-            const winDiv = document.createElement('div');
-            winDiv.id = `win-${appKey}`;
-            winDiv.className = 'window absolute top-20 left-32 w-[650px] h-[450px] bg-slate-900/95 backdrop-blur-xl border border-slate-700/80 rounded-2xl shadow-2xl flex flex-col pointer-events-auto overflow-hidden';
-            winDiv.onclick = () => bringToFront(winDiv);
-
-            winDiv.innerHTML = `
-                <div class="h-11 bg-slate-800/90 border-b border-slate-700/80 px-4 flex items-center justify-between cursor-move" onmousedown="startDrag(event, '${winDiv.id}')">
-                    <div class="flex items-center gap-2">
-                        <i class="${app.icon}"></i>
-                        <span class="font-bold text-sm text-slate-200">${app.title}</span>
-                    </div>
-                    <button onclick="closeWindow('${winDiv.id}', '${appKey}')" class="w-6 h-6 rounded-lg bg-red-500/20 hover:bg-red-600 flex items-center justify-center text-red-400 hover:text-white transition"><i class="fa-solid fa-xmark text-xs"></i></button>
-                </div>
-                <div class="p-6 flex-1 text-xs text-slate-300 space-y-4">
-                    <h3 class="text-sm font-bold text-white border-b border-slate-800 pb-2">System Information</h3>
-                    <div class="grid grid-cols-2 gap-2">
-                        <div><span class="text-slate-500">OS Name:</span> Doors OS</div>
-                        <div><span class="text-slate-500">Version:</span> 6.3 Sovereign</div>
-                        <div><span class="text-slate-500">Kernel:</span> Linux 6.8.0-custom</div>
-                        <div><span class="text-slate-500">Architecture:</span> x86_64</div>
-                    </div>
-                    <h3 class="text-sm font-bold text-white border-b border-slate-800 pb-2 pt-4">Customization</h3>
-                    <button onclick="changeWallpaper()" class="bg-slate-800 hover:bg-slate-700 text-white px-4 py-2 rounded-xl border border-slate-700">Switch Desktop Wallpaper</button>
-                </div>
-            `;
-
-            document.getElementById('windows-container').appendChild(winDiv);
-            bringToFront(winDiv);
-            addTaskbarIcon(appKey);
-        }
-
-        // Window Control Helpers
-        function bringToFront(win) {
-            window.zIndexCounter += 1;
-            win.style.zIndex = window.zIndexCounter;
-        }
-
-        function minimizeWindow(winId) {
-            document.getElementById(winId).style.display = 'none';
-        }
-
-        function toggleMaximize(winId) {
-            const win = document.getElementById(winId);
-            win.classList.toggle('window-maximized');
-        }
-
-        function closeWindow(winId, appKey) {
-            const win = document.getElementById(winId);
-            if (win) win.remove();
-            removeTaskbarIcon(appKey);
-        }
-
-        // Taskbar Management
-        function addTaskbarIcon(appKey) {
-            const container = document.getElementById('taskbar-apps');
-            if (document.getElementById(`tb-${appKey}`)) return;
-
-            const app = appData[appKey];
-            const btn = document.createElement('button');
-            btn.id = `tb-${appKey}`;
-            btn.onclick = () => {
-                const win = document.getElementById(`win-${appKey}`);
-                if (win) {
-                    if (win.style.display === 'none') {
-                        win.style.display = 'flex';
-                        bringToFront(win);
+                if (post.ignores >= 1000) {
+                    if (!post.forgiveness_used) {
+                        post.forgiveness_used = true;
+                        post.ignores = 500;
                     } else {
-                        win.style.display = 'none';
+                        post.is_buried = true;
+                        return { ...post, score: -999, statusText: "Buried (مدفون)", badgeClass: "" };
                     }
                 }
-            };
-            btn.className = 'h-9 px-3 bg-slate-800/60 hover:bg-slate-700/80 rounded-lg text-slate-200 text-xs flex items-center gap-2 border border-slate-700/50 transition';
-            btn.innerHTML = `<i class="${app.icon}"></i> <span>${app.title}</span>`;
-            container.appendChild(btn);
+
+                let vVec = textToVector(post.title + " " + (post.author || ""));
+                let similarity = calculateCosineSimilarity(userVector, vVec);
+
+                let statusText = "مرحلة الاختبار (Sandbox)";
+                let badgeClass = "badge-testing";
+
+                if (post.forgiveness_used) {
+                    statusText = "تحت العفو (Probation)";
+                    badgeClass = "badge-forgiven";
+                } else if (post.views >= 100) {
+                    statusText = "مرشح ومروّج (Promoted)";
+                    badgeClass = "badge-promoted";
+                    similarity += 0.3;
+                }
+
+                return { ...post, score: similarity, statusText, badgeClass };
+            });
+
+            scoredPosts.sort((a, b) => b.score - a.score);
+
+            let htmlContent = '';
+            let activeCount = 0;
+
+            scoredPosts.forEach((post) => {
+                if (post.is_buried) return;
+                activeCount++;
+                let idxVal = post.originalIndex !== undefined ? post.originalIndex : post.id;
+
+                htmlContent += `
+                    <div class="video-card">
+                        <video class="video-thumb" src="${post.url}" controls preload="metadata" onclick="selectVideo(${idxVal})"></video>
+                        <div class="video-info-area">
+                            <span class="video-title" onclick="selectVideo(${idxVal})">${post.title}</span>
+                            <div class="card-meta">
+                                <span><i class="fas fa-user"></i> ${post.author}</span>
+                                <span>👁️ المشاهدات: ${post.views} | ⚠️ التجاهل: ${post.ignores}</span>
+                                <div class="ai-badges">
+                                    <span class="badge ${post.badgeClass}">${post.statusText}</span>
+                                    <span class="badge" style="background:#334155; color:#fff;">الدرجة: ${post.score.toFixed(2)}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="ai-actions">
+                            <button class="ai-btn btn-like" onclick="interactWithCloudVideo('${post.id}', 'like', ${post.originalIndex})">👍 إعجاب</button>
+                            <button class="ai-btn btn-watch" onclick="interactWithCloudVideo('${post.id}', 'watch', ${post.originalIndex})">▶️ مشاهدة</button>
+                            <button class="ai-btn btn-skip" onclick="interactWithCloudVideo('${post.id}', 'skip', ${post.originalIndex})">⏭️ تخطي</button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            if (activeCount === 0) {
+                grid.innerHTML = `
+                    <div class="multi-lang-msg">
+                        <span class="lang-en">No active recommendations available.</span>
+                        <span class="lang-ar">لا توجد توصيات نشطة متاحة.</span>
+                        <span class="lang-ru">Нет активных рекомендаций.</span>
+                    </div>
+                `;
+                return;
+            }
+
+            grid.innerHTML = htmlContent;
         }
 
-        function removeTaskbarIcon(appKey) {
-            const btn = document.getElementById(`tb-${appKey}`);
-            if (btn) btn.remove();
+        async function interactWithCloudVideo(videoId, action, originalIndex) {
+            let rawPosts = JSON.parse(localStorage.getItem('all_published_videos') || '[]');
+            let targetIdx = originalIndex !== undefined && originalIndex >= 0 ? originalIndex : rawPosts.findIndex(p => p.id == videoId);
+            
+            if (targetIdx === -1 && rawPosts.length === 0) return;
+            
+            let post = rawPosts[targetIdx] || { title: "Test Video", views: 50, ignores: 0 };
+            if (post.views === undefined) post.views = 50;
+            if (post.ignores === undefined) post.ignores = 0;
+
+            let vVec = textToVector(post.title);
+            let weight = 0;
+
+            if (action === 'like') {
+                weight = 2.0;
+                post.views += 1;
+            } else if (action === 'watch') {
+                weight = 1.0;
+                post.views += 1;
+            } else if (action === 'skip') {
+                weight = -1.5;
+                post.ignores += 500;
+            }
+
+            for (let i = 0; i < userVector.length; i++) {
+                userVector[i] += vVec[i] * weight;
+            }
+
+            if (rawPosts[targetIdx]) {
+                rawPosts[targetIdx] = post;
+                localStorage.setItem('all_published_videos', JSON.stringify(rawPosts));
+            }
+
+            if (supabaseClient) {
+                try {
+                    await supabaseClient.from('videos').update({
+                        views: post.views,
+                        ignores: post.ignores,
+                        forgiveness_used: post.forgiveness_used,
+                        is_buried: post.is_buried
+                    }).eq('id', videoId);
+                } catch (e) {
+                    console.log("Supabase sync update saved locally");
+                }
+            }
+
+            await loadAndProcessVideosFromCloud();
         }
 
-        // Dragging Logic
-        let activeDragWin = null;
-        let dragOffsetX = 0;
-        let dragOffsetY = 0;
-
-        function startDrag(e, winId) {
-            activeDragWin = document.getElementById(winId);
-            dragOffsetX = e.clientX - activeDragWin.offsetLeft;
-            dragOffsetY = e.clientY - activeDragWin.offsetTop;
-            document.addEventListener('mousemove', onDrag);
-            document.addEventListener('mouseup', stopDrag);
-        }
-
-        function onDrag(e) {
-            if (!activeDragWin || activeDragWin.classList.contains('window-maximized')) return;
-            activeDragWin.style.left = `${e.clientX - dragOffsetX}px`;
-            activeDragWin.style.top = `${e.clientY - dragOffsetY}px`;
-        }
-
-        function stopDrag() {
-            document.removeEventListener('mousemove', onDrag);
-            document.removeEventListener('mouseup', stopDrag);
-            activeDragWin = null;
+        function selectVideo(index) {
+            const globalPosts = JSON.parse(localStorage.getItem('all_published_videos')) || [];
+            if (globalPosts[index]) {
+                localStorage.setItem('selectedVideo', JSON.stringify(globalPosts[index]));
+                window.location.href = 'v.html';
+            }
         }
     </script>
 </body>

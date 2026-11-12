@@ -381,7 +381,7 @@
     <!-- Header Top -->
     <div class="header-top">
         <div class="center-content">
-            <img src="file:///C:/Users/USER/Desktop/%D9%85%D8%AC%D9%84%D8%AF%20%D8%AC%D8%AF%D9%8A%D8%AF/.png-image_16162666.png" alt="Logo" class="my-logo">
+            <span style="font-weight: bold; color: var(--primary-color);">Orange Design</span>
         </div>
         <div class="search-box-wrapper">
             <form action="search.html" method="GET" class="search-box">
@@ -459,7 +459,7 @@
         <div class="modal-box">
             <h3>تأكيد رمز الهاتف (OTP)</h3>
             <p>تم إرسال رمز مكون من 6 أرقام إلى رقم الموبايل الخاص بك. يُرجى إدخاله لتأكيد التغييرات:</p>
-            <p style="font-size: 12px; color: #888;">(ملاحظة: يجب كتابة الرمز بالأرقام فقط. أي تغيير أو رمز خاطئ سيتم رفضه).</p>
+            <p style="font-size: 12px; color: #888;">(ملاحظة: يجب كتابة الرمز بالأرقام فقط).</p>
             
             <input type="text" id="otpInput" maxlength="6" placeholder="000000" pattern="\d*">
             
@@ -472,11 +472,10 @@
 
     <!-- Script Supabase and Logic -->
     <script>
-        // 1. إعداد Supabase
+        // 1. إعداد Supabase (استبدل بالبيانات الخاصة بك)
         const SUPABASE_URL = "https://your-supabase-url.supabase.co"; 
         const SUPABASE_KEY = "your-anon-key";
         
-        // استخدام supabaseClient بدلاً من supabase لعدم حدوث ReferenceError
         const supabaseClient = (window.supabase && SUPABASE_URL !== "https://your-supabase-url.supabase.co") 
             ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY) 
             : null;
@@ -485,7 +484,6 @@
         let generatedOtpCode = null;
         let pendingUpdateData = null;
 
-        // التبديل بين التبويبات
         function switchTab(tabId, evt) {
             document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
@@ -496,16 +494,15 @@
             document.getElementById(tabId).classList.add('active');
         }
 
-        // تحميل البيانات عند فتح الصفحة
         window.addEventListener("DOMContentLoaded", async () => {
             await loadUserData();
             await fetchUserVideos();
         });
 
-        // 2. تحميل بيانات المستخدم (اسم الحساب، اسم الشخص، رقم الهاتف)
+        // 2. تحميل بيانات المستخدم من Supabase (مصححة لعدم إظهار أسماء وهمية قديمة)
         async function loadUserData() {
-            let username = 'مستخدم Orange';
-            let accountName = '';
+            let username = 'مستخدم جديد';
+            let accountName = 'user';
             let phone = 'غير محدد';
 
             if (supabaseClient) {
@@ -515,12 +512,10 @@
                     if (session && session.user) {
                         currentUser = session.user;
 
-                        // قراءة اسم الشخص واسم الحساب ورقم الموبايل من user_metadata
-                        username = currentUser.user_metadata?.full_name || currentUser.user_metadata?.username || username;
-                        accountName = currentUser.user_metadata?.username || currentUser.user_metadata?.account_name || '';
-                        phone = currentUser.phone || currentUser.user_metadata?.phone || phone;
+                        username = currentUser.user_metadata?.full_name || currentUser.user_metadata?.username || currentUser.email || 'مستخدم Orange';
+                        accountName = currentUser.user_metadata?.username || currentUser.user_metadata?.account_name || (currentUser.email ? currentUser.email.split('@')[0] : 'user');
+                        phone = currentUser.phone || currentUser.user_metadata?.phone || 'غير محدد';
 
-                        // محاولة جلب من جدول profiles إذا كان موجوداً
                         const { data: profile } = await supabaseClient
                             .from('profiles')
                             .select('*')
@@ -532,38 +527,25 @@
                             if (profile.username) accountName = profile.username;
                             if (profile.phone) phone = profile.phone;
                         }
+                    } else {
+                        currentUser = null;
+                        document.getElementById('displayUsername').textContent = "يرجى تسجيل الدخول";
+                        document.getElementById('displayAccountName').textContent = "@guest";
+                        document.getElementById('displayPhone').textContent = "رقم الهاتف: غير محدد";
+                        document.getElementById('inputUsername').value = "";
+                        document.getElementById('inputPhone').value = "";
+                        return;
                     }
                 } catch (err) {
                     console.error("خطأ عند جلب البيانات من Supabase:", err);
                 }
             }
 
-            // الاستعانة بـ LocalStorage في حال تعذر الاتصال أو للاستخدام المحلي
-            if (localStorage.getItem('user_fullname')) {
-                username = localStorage.getItem('user_fullname');
-            }
-            if (!accountName && localStorage.getItem('user_username')) {
-                accountName = localStorage.getItem('user_username');
-            }
-            if (phone === 'غير محدد' && localStorage.getItem('user_phone')) {
-                phone = localStorage.getItem('user_phone');
-            }
-
-            // إذا لم يتوفر اسم الحساب، يتم اقتطاع الجزء الأول من المعرف أو استخدام القيمة الافتراضية
-            if (!accountName) {
-                accountName = 'Jio3Rfwi0e'; 
-            }
-
-            // عرض البيانات المحدثة في واجهة الملف الشخصي
             document.getElementById('displayUsername').textContent = username;
-            
-            // إضافة رمز @ أمام اسم الحساب
             document.getElementById('displayAccountName').textContent = accountName.startsWith('@') ? accountName : '@' + accountName;
-            
             document.getElementById('displayPhone').textContent = 'رقم الهاتف: ' + phone;
 
-            // تعبئة البيانات في حقول التعديل
-            document.getElementById('inputUsername').value = accountName;
+            document.getElementById('inputUsername').value = accountName.replace('@', '');
             document.getElementById('inputPhone').value = phone !== 'غير محدد' ? phone : '';
         }
 
@@ -571,8 +553,8 @@
         async function fetchUserVideos() {
             const container = document.getElementById('videosGrid');
             
-            if (!currentUser && !supabaseClient) {
-                container.innerHTML = '<div class="no-videos">لا توجد فيديوهات مسجلة باسم هذا الحساب.</div>';
+            if (!currentUser || !supabaseClient) {
+                container.innerHTML = '<div class="no-videos">يرجى تسجيل الدخول لعرض فيديوهاتك.</div>';
                 return;
             }
 
@@ -580,7 +562,7 @@
                 const { data: videos, error } = await supabaseClient
                     .from('videos')
                     .select('*')
-                    .eq('user_id', currentUser ? currentUser.id : '')
+                    .eq('user_id', currentUser.id)
                     .order('created_at', { ascending: false });
 
                 if (error || !videos || videos.length === 0) {
@@ -622,16 +604,12 @@
             }
         }
 
-        // نسخ رابط الفيديو
         function copyVideoUrl(url) {
             navigator.clipboard.writeText(url).then(() => {
                 alert("تم نسخ رابط الفيديو بنجاح!");
-            }).catch(err => {
-                alert("فشل في نسخ الرابط: " + err);
             });
         }
 
-        // تعديل عنوان الفيديو
         async function editVideoTitle(videoId, oldTitle) {
             const newTitle = prompt("أدخل العنوان الجديد للفيديو:", oldTitle);
             if (newTitle && newTitle.trim() !== "" && newTitle !== oldTitle) {
@@ -647,9 +625,8 @@
             }
         }
 
-        // حذف الفيديو
         async function deleteVideo(videoId) {
-            if (confirm("هل أنت تأكد من إمكانية حذف هذا الفيديو؟")) {
+            if (confirm("هل أنت متأكد من رغبتك في حذف هذا الفيديو؟")) {
                 if (supabaseClient && currentUser) {
                     await supabaseClient
                         .from('videos')
@@ -662,7 +639,6 @@
             }
         }
 
-        // 4. تقديم نموذج تعديل الحساب
         async function handleProfileUpdate(event) {
             event.preventDefault();
 
@@ -675,7 +651,6 @@
                 return;
             }
 
-            // توليد رمز OTP تجريبي مكون من 6 أرقام
             generatedOtpCode = Math.floor(100000 + Math.random() * 900000).toString();
 
             pendingUpdateData = {
@@ -684,22 +659,15 @@
                 password: newPassword
             };
 
-            alert(`[تنبيه الرمز الفريد OTP]: تم إرسال الرمز الفريد (${generatedOtpCode}) إلى الرقم ${newPhone}`);
+            alert(`[رمز التفعيل OTP]: تم إرسال الرمز التجريبي (${generatedOtpCode}) إلى الرقم ${newPhone}`);
             document.getElementById('otpModal').classList.add('active');
         }
 
-        // 5. التحقق من رمز OTP وإتمام الحفظ
         async function verifyOtpCode() {
             const enteredOtp = document.getElementById('otpInput').value.trim();
 
-            if (!/^\d+$/.test(enteredOtp)) {
-                alert("خطأ: يرجى كتابة الرمز المكون من أرقام فقط! تم رفض التغيير.");
-                rejectChanges();
-                return;
-            }
-
             if (enteredOtp !== generatedOtpCode) {
-                alert("رمز OTP غير صحيح! تم رفض أي تغيير.");
+                alert("رمز OTP غير صحيح! تم رفض التغيير.");
                 rejectChanges();
                 return;
             }
@@ -721,11 +689,7 @@
                         .upsert({ id: currentUser.id, username: pendingUpdateData.username, phone: pendingUpdateData.phone });
                 }
 
-                // حفظ اسم الحساب ورقم الهاتف في LocalStorage
-                localStorage.setItem('user_username', pendingUpdateData.username);
-                localStorage.setItem('user_phone', pendingUpdateData.phone);
-
-                alert("تم تحديث بيانات الحساب بنجاح ورابط اسم الحساب!");
+                alert("تم تحديث بيانات الحساب وحفظها في Supabase بنجاح!");
                 
                 closeOtpModal();
                 loadUserData();
@@ -747,7 +711,6 @@
             document.getElementById('otpInput').value = '';
         }
 
-        // دالة الحماية (HTML Escaping)
         function escapeHtml(str) {
             return String(str)
                 .replace(/&/g, "&amp;")
