@@ -1,0 +1,17 @@
+{
+  "name": "Zozen Store",
+  "short_name": "Zozen",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#0066ff",
+  "description": "Direct APK & AAB Packages Hub",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/226/226770.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
